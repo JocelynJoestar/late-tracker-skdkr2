@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="./css/style.css" />
+  <title>Late Tracker</title>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Late Tracker</h1>
+      <p class="small">Sila pilih peranan.</p>
+
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn-primary" id="prefectBtn">Pengawas</button>
+        <button class="btn-ghost" id="teacherBtn">Guru Disiplin</button>
+      </div>
+
+      <div id="teacherForm" style="margin-top:16px; display:none;">
+        <hr/>
+        <h2 style="margin-top:0;">Guru Disiplin Login</h2>
+
+        <div class="row">
+          <div>
+            <label>Email</label>
+            <input id="email" type="email" placeholder="teacher@school.com" />
+          </div>
+          <div>
+            <label>Password</label>
+            <input id="password" type="password" placeholder="••••••••" />
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <button class="btn-primary" id="loginBtn">Login</button>
+        </div>
+      </div>
+
+      <p id="msg" style="margin-top:10px;"></p>
+    </div>
+  </div>
+
+  <script type="module" src="./js/login.js"></script>
+</body>
+</html>
