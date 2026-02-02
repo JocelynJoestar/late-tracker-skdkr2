@@ -1,0 +1,262 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="./css/style.css" />
+  <title>Late Tracker - Teacher</title>
+
+  <!-- Extra styles for filters + charts -->
+  <style>
+    /* --- Filter header --- */
+    .filter-toggle {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+    }
+
+    /* --- Panel --- */
+    .filter-panel {
+      display:none;
+      margin-top:14px;
+      padding-top:12px;
+      border-top:1px solid rgba(0,0,0,.06);
+    }
+    .filter-panel.open { display:block; }
+
+    /* --- Pills grid --- */
+    .pill-grid {
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    .pill {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      cursor:pointer;
+      user-select:none;
+    }
+
+    .pill span {
+      display:inline-flex;
+      align-items:center;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(0,0,0,.10);
+      background:#fff;
+      font-weight:600;
+      font-size:13px;
+      line-height:1;
+      transition: 120ms ease;
+      white-space:nowrap;
+    }
+
+    /* checked style */
+    .pill input:checked + span {
+      background: rgba(0,0,0,.08);
+      border-color: rgba(0,0,0,.18);
+    }
+
+    /* "All" pills stand out */
+    .pill span.all {
+      border-color: rgba(0,0,0,.14);
+    }
+    .pill input:checked + span.all {
+      background: rgba(0,0,0,.75);
+      border-color: rgba(0,0,0,.75);
+      color:#fff;
+    }
+
+    /* hover */
+    .pill:hover span {
+      border-color: rgba(0,0,0,.22);
+    }
+
+    /* Actions row */
+    .filter-actions {
+      margin-top:14px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    /* Small helpers */
+    .nowrap { white-space:nowrap; }
+    .muted { color:rgba(0,0,0,.55); }
+
+    /* ===== Charts layout (stacked) ===== */
+    .charts-stack {
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      margin-top:12px;
+    }
+
+    .chart-box {
+      position:relative;
+      width:100%;
+    }
+
+    /* Bigger bar chart (top) */
+    .chart-box--bar {
+      height:340px;
+    }
+
+    /* Bigger pie/doughnut (bottom) */
+    .chart-box--pie {
+      height:420px;
+    }
+
+    .chart-box canvas{
+      width:100% !important;
+      height:100% !important;
+      display:block;
+    }
+
+    /* Make tables consistent + stop columns shifting */
+    .fixed-table {
+      width: 100%;
+      table-layout: fixed;
+    }
+
+    .fixed-table td,
+    .fixed-table th {
+      vertical-align: top;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+
+    .fixed-table th {
+      white-space: nowrap;
+    }
+
+    .cell-nowrap { white-space: nowrap; }
+    .cell-wrap { white-space: normal; }
+
+    /* --- Language select: keep it looking like button --- */
+    
+    
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div>
+        <h1 id="pageTitle" data-i18n="teacher.title">Discipline Teacher Dashboard</h1>
+        <div class="badge" id="whoami">Loading…</div>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center;">
+        <!-- Language Switch -->
+      
+        <button class="btn-ghost" id="logoutBtn" data-i18n="teacher.btn.logout">Logout</button>
+      </div>
+    </div>
+
+    <!-- Range + Date -->
+    <div class="card">
+      <h2 id="filterTitle" data-i18n="teacher.filter" style="margin:0 0 10px;">Filter</h2>
+
+      <div class="row">
+        <div>
+          <label id="rangeLabel" data-i18n="teacher.range">Range</label>
+          <select id="range">
+            <option value="daily" data-i18n="teacher.range.daily">Daily (Today)</option>
+            <option value="weekly" data-i18n="teacher.range.weekly">Weekly (Last 7 days)</option>
+            <option value="monthly" selected data-i18n="teacher.range.monthly">Monthly (This month)</option>
+            <option value="date" data-i18n="teacher.range.date">Specific Date</option>
+          </select>
+        </div>
+
+        <div>
+          <label id="pickDateLabel" data-i18n="teacher.pickDate">Pick Date</label>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <input id="pickedDate" type="date" />
+            <button class="btn-ghost" id="clearDateBtn" type="button" data-i18n="teacher.btn.clear">Clear</button>
+          </div>
+          <div class="small muted" id="pickDateHint" data-i18n="teacher.pickDateHint">
+            Pick Date only works when Range = Specific Date
+          </div>
+        </div>
+      </div>
+
+      <hr style="margin:14px 0;" />
+
+      <!-- Filter button -->
+      <div class="filter-toggle">
+        <div>
+          <strong id="moreFiltersTitle" data-i18n="teacher.moreFilters">More Filters</strong>
+          <div class="small muted" id="moreFiltersHint" data-i18n="teacher.moreFiltersHint">
+            Tick level/class to narrow the result.
+          </div>
+        </div>
+        <button class="btn-ghost" id="toggleFiltersBtn" type="button" data-i18n="teacher.btn.filters">Filters</button>
+      </div>
+
+      <div class="filter-panel" id="filterPanel">
+        <div style="margin-top:12px;">
+          <h3 id="levelsTitle" data-i18n="teacher.levels" style="margin:0 0 8px; font-size:14px;">Levels</h3>
+          <div class="pill-grid" id="levelFilters"></div>
+        </div>
+
+        <div style="margin-top:14px;">
+          <h3 id="classesTitle" data-i18n="teacher.classes" style="margin:0 0 8px; font-size:14px;">Classes</h3>
+          <div class="pill-grid" id="classFilters"></div>
+        </div>
+
+        <div class="filter-actions">
+          <button class="btn-primary" id="applyFiltersBtn" type="button" data-i18n="teacher.btn.apply">Apply Filters</button>
+          <button class="btn-ghost" id="resetFiltersBtn" type="button" data-i18n="teacher.btn.reset">Reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="card">
+      <h2 id="summaryTitle" data-i18n="teacher.summary" style="margin:0 0 10px;">Summary</h2>
+      <div id="summary" class="small muted">Loading…</div>
+    </div>
+
+    <!-- Charts (STACKED) -->
+    <div class="charts-stack">
+      <div class="card">
+        <h2 id="barTitle" data-i18n="teacher.chart.barTitle" style="margin:0 0 10px;">Late Count by Class</h2>
+        <div class="chart-box chart-box--bar">
+          <canvas id="classBar"></canvas>
+        </div>
+      </div>
+
+      <div class="card" id="levelDoughnutCard">
+        <h2 id="doughnutTitle" data-i18n="teacher.chart.doughnutTitle" style="margin:0 0 10px;">Late % by Level</h2>
+        <div class="chart-box chart-box--pie">
+          <canvas id="levelDoughnut"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student frequency -->
+    <div class="card" style="margin-top:12px;">
+      <h2 id="freqTitle" data-i18n="teacher.freqTitle" style="margin:0 0 6px;">Student Late Frequency (by Class)</h2>
+      <div id="freqHint" data-i18n="teacher.freqHint" class="small muted">
+        Percent is based on total late records within the same class for the selected range.
+      </div>
+      <hr/>
+      <div id="studentStats"></div>
+    </div>
+
+    <!-- Existing list -->
+    <div class="card" style="margin-top:12px;">
+      <h2 id="lateListTitle" data-i18n="teacher.lateListTitle" style="margin:0 0 10px;">Late Students List (Grouped by Level)</h2>
+      <div id="lists"></div>
+    </div>
+  </div>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="./js/teacher.js"></script>
+</body>
+</html>

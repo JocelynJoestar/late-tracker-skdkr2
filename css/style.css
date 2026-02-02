@@ -1,0 +1,90 @@
+* { box-sizing: border-box; font-family: Arial, sans-serif; }
+body { margin: 0; background: #f6f7fb; color: #111; }
+.container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+.card { background: #fff; border-radius: 14px; padding: 16px; box-shadow: 0 6px 18px rgba(0,0,0,.07); margin-bottom: 16px; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 760px){ .row { grid-template-columns: 1fr; } }
+
+h1 { margin: 0 0 10px; font-size: 22px; }
+h2 { margin: 12px 0 10px; font-size: 18px; }
+label { font-weight: 600; font-size: 13px; display: block; margin-bottom: 6px; }
+input, select, textarea {
+  width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #d9dbe7; outline: none;
+}
+textarea { min-height: 90px; resize: vertical; }
+button {
+  border: 0; border-radius: 10px; padding: 10px 14px; font-weight: 700; cursor: pointer;
+}
+.btn-primary { background: #1f6feb; color: #fff; }
+.btn-ghost { background: transparent; border: 1px solid #d9dbe7; }
+.topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom: 14px; }
+.badge { background:#eef2ff; padding:6px 10px; border-radius:999px; font-size: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; vertical-align: top; }
+.small { font-size: 12px; color: #555; }
+.error { color: #b00020; font-weight: 700; }
+.success { color: #0a7b34; font-weight: 700; }
+hr { border: 0; border-top: 1px solid #eee; margin: 12px 0; }
+
+/* Prefect actions buttons */
+.btn-edit {
+  background: #B0E0E6;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.btn-del {
+  background: #F08080;
+  border: 1px solid rgba(0,0,0,0.08);
+}
+
+.btn-edit:hover,
+.btn-del:hover {
+  filter: brightness(0.98);
+}
+
+/* Keep Class column in one line */
+table th:nth-child(3),
+table td:nth-child(3) {
+  white-space: nowrap;
+}
+
+/* Optional: give the Class column a bit more room */
+table th:nth-child(3),
+table td:nth-child(3) {
+  min-width: 90px;
+}
+
+/* teacher's filter */
+
+/* Make checkbox + text sit side-by-side */
+.pill,
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  vertical-align: middle;
+}
+
+/* If your checkbox is inside label, prevent wrapping */
+.pill,
+.chip {
+  white-space: nowrap;
+}
+
+/* Make checkbox not push the text down */
+.pill input[type="checkbox"],
+.chip input[type="checkbox"]{
+  margin: 0;
+  transform: translateY(1px); /* optional: align nicer */
+}
+
+/* If your old grid makes them go weird, use flex-wrap */
+.pill-grid,
+.chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+
+

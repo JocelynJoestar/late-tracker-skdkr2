@@ -1,0 +1,120 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="./css/style.css" />
+  <title>Late Tracker - Prefect</title>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div>
+        <h1 data-i18n="prefect.title">Prefect On Duty</h1>
+        <div class="badge" id="whoami">Loading…</div>
+      </div>
+
+      <div style="display:flex; gap:10px; align-items:center;">
+        <span class="small" data-i18n="lang.label">Language</span>
+        <select id="langSelect">
+          <option value="en">English</option>
+          <option value="ms">Bahasa Melayu</option>
+        </select>
+        <button class="btn-ghost" id="logoutBtn" data-i18n="btn.logout">Logout</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="prefect.recordTitle">Record Late Student</h2>
+
+      <div class="row">
+        <div>
+          <label data-i18n="prefect.class">Class</label>
+          <select id="className"></select>
+        </div>
+
+        <div>
+          <label data-i18n="prefect.studentName">Student Name</label>
+          <!-- CHANGED: input -> select -->
+          <select id="studentName">
+            <option value="" disabled selected>-- Select Student --</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <div>
+          <label data-i18n="prefect.date">Date</label>
+          <input id="date" type="date" />
+        </div>
+        <div>
+          <label data-i18n="prefect.time">Time</label>
+          <input id="time" type="time" />
+        </div>
+      </div>
+
+      <div style="margin-top:12px;">
+        <label data-i18n="prefect.remark">Remark (Why late?)</label>
+
+        <select id="remarkSelect">
+          <option value="" disabled selected data-i18n-opt="remark.pick">-- Choose reason --</option>
+
+          <option value="remark.woke" data-i18n-opt="remark.woke">Bangun lewat</option>
+          <option value="remark.alarm" data-i18n-opt="remark.alarm">Alarm tak berbunyi / habis bateri</option>
+          <option value="remark.slow" data-i18n-opt="remark.slow">Lambat siap (mandi/pakaian/beg)</option>
+          <option value="remark.forgot" data-i18n-opt="remark.forgot">Tertinggal barang sekolah</option>
+          <option value="remark.parents" data-i18n-opt="remark.parents">Ibu bapa/penjaga lambat bersiap / lewat hantar</option>
+          <option value="remark.bus" data-i18n-opt="remark.bus">Bas/van sekolah lewat / tak datang</option>
+          <option value="remark.traffic" data-i18n-opt="remark.traffic">Jem trafik / jalan sesak</option>
+          <option value="remark.weather" data-i18n-opt="remark.weather">Cuaca buruk (hujan lebat/banjir)</option>
+          <option value="remark.sick" data-i18n-opt="remark.sick">Sakit ringan / kurang sihat</option>
+          <option value="remark.family" data-i18n-opt="remark.family">Urusan keluarga pagi (hantar adik, kecemasan)</option>
+
+          <option value="__OTHER__" data-i18n-opt="remark.other">Lain-lain (taip sendiri)</option>
+        </select>
+
+        <input id="remarkOther" data-i18n-ph="remark.otherPh"
+          placeholder="Type other reason…" style="display:none; margin-top:8px;" />
+      </div>
+
+      <div style="margin-top:12px; display:flex; gap:10px; align-items:center;">
+        <button class="btn-primary" id="submitBtn" data-i18n="prefect.submit">Submit</button>
+        <span id="msg"></span>
+      </div>
+    </div>
+
+    <div class="card">
+  <h2 data-i18n="prefect.latestTitle">Students Record</h2>
+  <div class="small" data-i18n="prefect.latestSubtitle">Double-check what you entered.</div>
+  <hr/>
+
+  <div style="overflow:auto;">
+    <table>
+      <thead>
+        <tr>
+          <th data-i18n="table.datetime">Date/Time</th>
+          <th data-i18n="table.name">Name</th>
+          <th data-i18n="table.class">Class</th>
+          <th data-i18n="table.level">Level</th>
+          <th data-i18n="table.remark">Remark</th>
+          <th data-i18n="table.actions">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div style="display:flex; gap:10px; align-items:center; justify-content:flex-end; margin-top:12px;">
+    <button class="btn-ghost" id="prevBtn" disabled data-i18n="btn.prev">Previous</button>
+    <span class="small" id="pageInfo">Page 1</span>
+    <button class="btn-ghost" id="nextBtn" disabled data-i18n="btn.next">Next</button>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+  <script type="module" src="./js/prefect.js"></script>
+</body>
+</html>
