@@ -1,4 +1,4 @@
-// i18n.js (PREFECT)
+// js/i18n.js  (Prefect)
 
 const STORAGE_KEY = "lang_prefect";
 
@@ -132,25 +132,25 @@ export function applyI18n(root = document) {
   const lang = getLang();
 
   // Text
-  root.querySelectorAll("[data-i18n]").forEach(el => {
+  root.querySelectorAll("[data-i18n]").forEach((el) => {
     const key = el.getAttribute("data-i18n");
     el.textContent = t(key);
   });
 
-  // Placeholders (if you use data-i18n-ph)
-  root.querySelectorAll("[data-i18n-ph]").forEach(el => {
+  // Placeholders
+  root.querySelectorAll("[data-i18n-ph]").forEach((el) => {
     const key = el.getAttribute("data-i18n-ph");
     const text = DICT[lang]?.[key] ?? DICT.en?.[key] ?? key;
     el.setAttribute("placeholder", text);
   });
 
-  // Options (ONLY if you use data-i18n-opt)
-  root.querySelectorAll("option[data-i18n-opt]").forEach(opt => {
+  // Options (only if you actually use data-i18n-opt)
+  root.querySelectorAll("option[data-i18n-opt]").forEach((opt) => {
     const key = opt.getAttribute("data-i18n-opt");
     opt.textContent = DICT[lang]?.[key] ?? DICT.en?.[key] ?? key;
   });
 
   // Sync dropdown if exists
-  const sel = root.getElementById?.("langSelect") || document.getElementById("langSelect");
+  const sel = document.getElementById("langSelect");
   if (sel) sel.value = lang;
 }
