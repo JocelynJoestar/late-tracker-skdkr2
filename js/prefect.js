@@ -1,17 +1,16 @@
+// prefect.js
+
 import { auth, db } from "./firebase.js";
 import { attachLogout } from "./auth-guard.js";
-import { onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { onAuthStateChanged,signInAnonymously} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import { applyI18n, getLang, setLang, t } from "./i18n.js";
 
-import {
-  collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs, Timestamp,
-  doc, deleteDoc, updateDoc,
-  startAfter, endBefore, limitToLast
+import {collection, addDoc, serverTimestamp, query, orderBy, limit, getDocs, Timestamp, doc, deleteDoc, updateDoc, startAfter, endBefore, limitToLast
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 attachLogout();
 
-/** ===== Students JSON (Option 1) ===== */
+/** ===== Students JSON ===== */
 const STUDENTS_JSON_PATH = "./dataStudents.json";
 let STUDENTS_BY_CLASS = {};
 
@@ -63,14 +62,21 @@ const msg = document.getElementById("msg");
 const rows = document.getElementById("rows");
 const whoami = document.getElementById("whoami");
 
-// pagination buttons from your updated HTML
 const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
 const pageInfo = document.getElementById("pageInfo");
 
+const submitBtn = document.getElementById("submitBtn");
+
 // ===== Helpers =====
+function setMsg(type, text) {
+  if (!msg) return;
+  msg.className = type || "";
+  msg.textContent = text || "";
+}
+
 function escapeHtml(s) {
-  return String(s)
+  return String(s ?? "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
@@ -78,7 +84,9 @@ function escapeHtml(s) {
 
 function fillClasses() {
   if (!classSelect) return;
-  classSelect.innerHTML = CLASSES.map(c => `<option value="${c.className}">${c.className}</option>`).join("");
+  classSelect.innerHTML = CLASSES
+    .map(c => `<option value="${escapeHtml(c.className)}">${escapeHtml(c.className)}</option>`)
+    .join("");
 }
 
 function getLevelForClass(className) {
@@ -92,14 +100,15 @@ function combineDateTime(dateStr, timeStr) {
 }
 
 function translateRemark(raw) {
-  const val = String(raw || "");
-  return val.startsWith("remark.") ? t(val) : val;
+  const val = String(raw || "").trim();
+  if (!val) return "";
+  return val.startsWith("remark.") ? (t(val) || val) : val;
 }
 
 function getRemarkValue() {
   if (!remarkSelect) return "";
-  const v = (remarkSelect.value || "").trim();
-  if (v === "__OTHER__") return (remarkOther?.value || "").trim();
+  const v = String(remarkSelect.value || "").trim();
+  if (v === "__OTHER__") return String(remarkOther?.value || "").trim();
   return v;
 }
 
@@ -131,8 +140,10 @@ function fillStudentsForClass(className) {
   if (!studentName) return;
 
   const list = STUDENTS_BY_CLASS[className] || [];
-  const placeholder = t("Select Student") || (getLang() === "ms" ? "-- Pilih Murid --" : "-- Select Student --");
-  const noneFound = t("Not Found") || (getLang() === "ms" ? "(Tiada murid dijumpai)" : "(No students found)");
+  const placeholder =
+    t("Select Student") || (getLang() === "ms" ? "-- Pilih Murid --" : "-- Select Student --");
+  const noneFound =
+    t("Not Found") || (getLang() === "ms" ? "(Tiada murid dijumpai)" : "(No students found)");
 
   if (list.length === 0) {
     studentName.innerHTML = `<option value="">${escapeHtml(noneFound)}</option>`;
@@ -148,84 +159,96 @@ function fillStudentsForClass(className) {
 // ===== Paginated records =====
 async function loadRecordsPage(direction = "first") {
   if (!rows) return;
+
   rows.innerHTML = "";
 
-  let qBase = query(
-    collection(db, "late_records"),
-    orderBy("dateTime", "desc"),
-    limit(PAGE_SIZE)
-  );
-
-  if (direction === "next" && lastDoc) {
-    qBase = query(
+  try {
+    let qBase = query(
       collection(db, "late_records"),
       orderBy("dateTime", "desc"),
-      startAfter(lastDoc),
       limit(PAGE_SIZE)
     );
-    pageNumber += 1;
+
+    if (direction === "next" && lastDoc) {
+      qBase = query(
+        collection(db, "late_records"),
+        orderBy("dateTime", "desc"),
+        startAfter(lastDoc),
+        limit(PAGE_SIZE)
+      );
+      pageNumber += 1;
+    }
+
+    if (direction === "prev" && firstDoc) {
+      qBase = query(
+        collection(db, "late_records"),
+        orderBy("dateTime", "desc"),
+        endBefore(firstDoc),
+        limitToLast(PAGE_SIZE)
+      );
+      pageNumber = Math.max(1, pageNumber - 1);
+    }
+
+    const snap = await getDocs(qBase);
+
+    firstDoc = snap.docs[0] || null;
+    lastDoc = snap.docs[snap.docs.length - 1] || null;
+
+    const html = snap.docs
+      .map(d => {
+        const r = d.data();
+        const id = d.id;
+
+        const dt = r.dateTime?.toDate ? r.dateTime.toDate().toLocaleString() : "";
+        const remarkText = translateRemark(r.remark || "");
+
+        return `<tr data-id="${escapeHtml(id)}">
+          <td>${escapeHtml(dt)}</td>
+          <td>${escapeHtml(r.studentName || "")}</td>
+          <td>${escapeHtml(r.className || "")}</td>
+          <td>${escapeHtml(r.level ?? "")}</td>
+          <td>${escapeHtml(remarkText)}</td>
+          <td style="white-space:nowrap;">
+            <button class="btn-ghost btn-edit" data-id="${escapeHtml(id)}"
+              style="background:#B0E0E6; border:1px solid rgba(0,0,0,.1);">
+              ${escapeHtml(t("btn.edit") || "Edit")}
+            </button>
+            <button class="btn-ghost btn-del" data-id="${escapeHtml(id)}"
+              style="margin-left:6px; background:#F08080; border:1px solid rgba(0,0,0,.1);">
+              ${escapeHtml(t("btn.delete") || "Delete")}
+            </button>
+          </td>
+        </tr>`;
+      })
+      .join("");
+
+    rows.innerHTML =
+      html ||
+      `<tr><td colspan="6" class="small">${escapeHtml(t("prefect.noSubmissions") || "No records.")}</td></tr>`;
+
+    // Page info + buttons
+    if (pageInfo) pageInfo.textContent = `Page ${pageNumber}`;
+    if (prevBtn) prevBtn.disabled = pageNumber <= 1;
+
+    // Look ahead to see if next page exists
+    let hasNext = false;
+    if (lastDoc) {
+      const qNext = query(
+        collection(db, "late_records"),
+        orderBy("dateTime", "desc"),
+        startAfter(lastDoc),
+        limit(1)
+      );
+      const nextSnap = await getDocs(qNext);
+      hasNext = !nextSnap.empty;
+    }
+    if (nextBtn) nextBtn.disabled = !hasNext;
+
+  } catch (err) {
+    console.error("loadRecordsPage error:", err);
+    setMsg("error", err?.message || String(err));
+    rows.innerHTML = `<tr><td colspan="6" class="small">${escapeHtml(err?.message || "Failed to load records.")}</td></tr>`;
   }
-
-  if (direction === "prev" && firstDoc) {
-    qBase = query(
-      collection(db, "late_records"),
-      orderBy("dateTime", "desc"),
-      endBefore(firstDoc),
-      limitToLast(PAGE_SIZE)
-    );
-    pageNumber = Math.max(1, pageNumber - 1);
-  }
-
-  const snap = await getDocs(qBase);
-
-  firstDoc = snap.docs[0] || null;
-  lastDoc = snap.docs[snap.docs.length - 1] || null;
-
-  const html = snap.docs.map(d => {
-    const r = d.data();
-    const id = d.id;
-
-    const dt = r.dateTime?.toDate ? r.dateTime.toDate().toLocaleString() : "";
-    const remarkText = translateRemark(r.remark || "");
-
-    return `<tr data-id="${id}">
-      <td>${dt}</td>
-      <td>${escapeHtml(r.studentName || "")}</td>
-      <td>${escapeHtml(r.className || "")}</td>
-      <td>${r.level ?? ""}</td>
-      <td>${escapeHtml(remarkText)}</td>
-      <td style="white-space:nowrap;">
-        <button class="btn-ghost btn-edit" data-id="${id}"
-          style="background:#B0E0E6; border:1px solid rgba(0,0,0,.1);">
-          ${escapeHtml(t("btn.edit") || "Edit")}
-        </button>
-        <button class="btn-ghost btn-del" data-id="${id}"
-          style="margin-left:6px; background:#F08080; border:1px solid rgba(0,0,0,.1);">
-          ${escapeHtml(t("btn.delete") || "Delete")}
-        </button>
-      </td>
-    </tr>`;
-  }).join("");
-
-  rows.innerHTML = html || `<tr><td colspan="6" class="small">${t("prefect.noSubmissions") || "No records."}</td></tr>`;
-
-  // enable/disable buttons
-  if (pageInfo) pageInfo.textContent = `Page ${pageNumber}`;
-  if (prevBtn) prevBtn.disabled = pageNumber <= 1;
-
-  // check if next page exists (look ahead 1 doc)
-  let hasNext = false;
-  if (lastDoc) {
-    const qNext = query(
-      collection(db, "late_records"),
-      orderBy("dateTime", "desc"),
-      startAfter(lastDoc),
-      limit(1)
-    );
-    const nextSnap = await getDocs(qNext);
-    hasNext = !nextSnap.empty;
-  }
-  if (nextBtn) nextBtn.disabled = !hasNext;
 }
 
 // ===== Auth =====
@@ -258,36 +281,46 @@ async function ensureSignedInAnonymously() {
 // ===== Init =====
 (async () => {
   try {
-    applyI18n();
+    // Apply i18n at start
+    applyI18n(document);
 
+    // Language dropdown (prefect only)
     if (langSelect) {
       langSelect.value = getLang();
       langSelect.addEventListener("change", async (e) => {
-        setLang(e.target.value);
-        applyI18n();
+        setLang(e.target.value); // setLang now re-applies i18n
         fillStudentsForClass(classSelect?.value || "");
-        try { await loadRecordsPage("first"); } catch {}
+        pageNumber = 1;
+        firstDoc = null;
+        lastDoc = null;
+        await loadRecordsPage("first");
       });
     }
 
+    // Fill class dropdown
     fillClasses();
 
+    // Load students list (JSON)
     try {
       await loadStudentsJson();
     } catch (e) {
-      if (msg) { msg.className = "error"; msg.textContent = e.message; }
+      console.error("loadStudentsJson error:", e);
+      setMsg("error", e.message);
       STUDENTS_BY_CLASS = {};
     }
 
+    // Populate students for current class
     if (classSelect) {
       fillStudentsForClass(classSelect.value);
       classSelect.addEventListener("change", () => fillStudentsForClass(classSelect.value));
     }
 
+    // Set default date/time
     const now = new Date();
     if (dateEl) dateEl.value = now.toISOString().slice(0, 10);
     if (timeEl) timeEl.value = now.toTimeString().slice(0, 5);
 
+    // Remark other
     if (remarkSelect && remarkOther) {
       remarkSelect.addEventListener("change", () => {
         const isOther = remarkSelect.value === "__OTHER__";
@@ -296,24 +329,21 @@ async function ensureSignedInAnonymously() {
       });
     }
 
-    const user = await ensureSignedInAnonymously();
+    // Sign in kiosk mode
+    await ensureSignedInAnonymously();
     if (whoami) whoami.textContent = "Pengawas • Kiosk Mode";
 
-    // first page
+    // Load first page
     pageNumber = 1;
     firstDoc = null;
     lastDoc = null;
     await loadRecordsPage("first");
 
-    // pagination buttons
-    if (nextBtn) nextBtn.addEventListener("click", async () => {
-      await loadRecordsPage("next");
-    });
-    if (prevBtn) prevBtn.addEventListener("click", async () => {
-      await loadRecordsPage("prev");
-    });
+    // Pagination buttons
+    if (nextBtn) nextBtn.addEventListener("click", async () => loadRecordsPage("next"));
+    if (prevBtn) prevBtn.addEventListener("click", async () => loadRecordsPage("prev"));
 
-    // edit/delete actions (event delegation)
+    // Edit/Delete actions (delegation)
     if (rows) {
       rows.addEventListener("click", async (e) => {
         const editBtn = e.target.closest(".btn-edit");
@@ -329,13 +359,13 @@ async function ensureSignedInAnonymously() {
 
           try {
             await deleteDoc(doc(db, "late_records", id));
-            // easiest: reload first page
             pageNumber = 1;
             firstDoc = null;
             lastDoc = null;
             await loadRecordsPage("first");
           } catch (err) {
-            if (msg) { msg.className = "error"; msg.textContent = err.message; }
+            console.error("delete error:", err);
+            setMsg("error", err?.message || String(err));
           }
           return;
         }
@@ -357,73 +387,73 @@ async function ensureSignedInAnonymously() {
             lastDoc = null;
             await loadRecordsPage("first");
           } catch (err) {
-            if (msg) { msg.className = "error"; msg.textContent = err.message; }
+            console.error("update error:", err);
+            setMsg("error", err?.message || String(err));
           }
         }
       });
     }
 
-    // Submit
-    document.getElementById("submitBtn").addEventListener("click", async () => {
-      if (msg) { msg.textContent = ""; msg.className = ""; }
+    // Submit record
+    if (submitBtn) {
+      submitBtn.addEventListener("click", async () => {
+        setMsg("", "");
 
-      const cls = classSelect?.value || "";
-      const name = (studentName?.value || "").trim();
-      const level = getLevelForClass(cls);
-      const remarkValue = getRemarkValue();
+        const cls = classSelect?.value || "";
+        const name = String(studentName?.value || "").trim();
+        const level = getLevelForClass(cls);
+        const remarkValue = getRemarkValue();
 
-      if (!cls || !name || !dateEl?.value || !timeEl?.value) {
-        if (msg) {
-          msg.className = "error";
-          msg.textContent =
+        if (!cls || !name || !dateEl?.value || !timeEl?.value) {
+          setMsg(
+            "error",
             t("prefect.errRequired") ||
-            (getLang() === "ms"
-              ? "Sila pilih kelas, nama murid, tarikh dan masa."
-              : "Please select class, student name, date, and time.");
+              (getLang() === "ms"
+                ? "Sila pilih kelas, nama murid, tarikh dan masa."
+                : "Please select class, student name, date, and time.")
+          );
+          return;
         }
-        return;
-      }
 
-      if (!remarkValue) {
-        if (msg) {
-          msg.className = "error";
-          msg.textContent = t("prefect.errRemark") || "Please select a remark.";
+        if (!remarkValue) {
+          setMsg("error", t("prefect.errRemark") || "Please select a remark.");
+          return;
         }
-        return;
-      }
 
-      try {
-        await addDoc(collection(db, "late_records"), {
-          studentName: name,
-          className: cls,
-          level,
-          dateTime: combineDateTime(dateEl.value, timeEl.value),
-          remark: remarkValue,
-          createdByUid: auth.currentUser.uid,
-          createdAt: serverTimestamp()
-        });
+        try {
+          await addDoc(collection(db, "late_records"), {
+            studentName: name,
+            className: cls,
+            level,
+            dateTime: combineDateTime(dateEl.value, timeEl.value),
+            remark: remarkValue,
+            createdByUid: auth.currentUser?.uid || null,
+            createdAt: serverTimestamp()
+          });
 
-        if (msg) { msg.className = "success"; msg.textContent = t("prefect.saved") || "Saved!"; }
+          setMsg("success", t("prefect.saved") || "Saved!");
 
-        if (studentName) studentName.selectedIndex = 0;
-        resetRemark();
+          if (studentName) studentName.selectedIndex = 0;
+          resetRemark();
 
-        // reload first page to show newest record
-        pageNumber = 1;
-        firstDoc = null;
-        lastDoc = null;
-        await loadRecordsPage("first");
-      } catch (e) {
-        if (msg) { msg.className = "error"; msg.textContent = e.message; }
-      }
-    });
+          pageNumber = 1;
+          firstDoc = null;
+          lastDoc = null;
+          await loadRecordsPage("first");
+        } catch (e) {
+          console.error("addDoc error:", e);
+          setMsg("error", e?.message || String(e));
+        }
+      });
+    }
 
   } catch (e) {
-    if (msg) {
-      msg.className = "error";
-      msg.textContent = e.message.includes("operation-not-allowed")
+    console.error("prefect init error:", e);
+    setMsg(
+      "error",
+      String(e?.message || e).includes("operation-not-allowed")
         ? "Anonymous login is not enabled in Firebase. Enable it in Authentication > Sign-in method > Anonymous."
-        : e.message;
-    }
+        : (e?.message || String(e))
+    );
   }
 })();
