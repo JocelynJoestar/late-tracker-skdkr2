@@ -1,5 +1,7 @@
 import { db } from "./firebase.js";
 import { requireRole, attachLogout } from "./auth-guard.js";
+import { t } from "./i18n.js";
+
 
 import {
   collection, query, where, orderBy, getDocs, Timestamp
@@ -63,6 +65,12 @@ function escapeHtml(s) {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
 }
+
+function remarkLabel(v) {
+  const s = String(v || "");
+  return s.startsWith("remark.") ? (t(s) || s) : s;
+}
+
 
 function normalizeRecord(r) {
   // Ensure consistent fields + numeric level
@@ -411,7 +419,7 @@ function renderLists(records) {
         <td class="cell-nowrap">${escapeHtml(dt)}</td>
         <td class="cell-wrap">${escapeHtml(r.studentName || "")}</td>
         <td class="cell-nowrap">${escapeHtml(r.className || "")}</td>
-        <td class="cell-wrap">${escapeHtml(r.remark || "")}</td>
+        <td class="cell-wrap">${escapeHtml(remarkLabel(r.remark))}</td>
       </tr>`;
     }).join("");
 
@@ -608,3 +616,4 @@ async function loadRangeAndRender() {
 
   await loadRangeAndRender();
 })();
+
