@@ -121,10 +121,10 @@ const DICT = {
     "teacher.pill.allClasses": "Semua Kelas",
     "teacher.pill.levelPrefix": "Tahap",
 
-    "teacher.summary.totalLate": "Jumlah Lewat",
+    "teacher.summary": "Jumlah Lewat",
 
-    "teacher.chart.barTitle.count": "Jumlah Lewat Mengikut Kelas",
-    "teacher.chart.barTitle.pct": "% Lewat Mengikut Murid (Kelas Dipilih)",
+    "teacher.chart.barTitle": "Jumlah Lewat Mengikut Kelas",
+    "teacher.chart.barTitle": "% Lewat Mengikut Murid (Kelas Dipilih)",
     "teacher.chart.doughnutTitle": "% Lewat Mengikut Tahap",
 
     "teacher.freqTitle": "Kekerapan Lewat Murid (Mengikut Kelas)",
@@ -191,4 +191,5 @@ export function applyI8n(root = document) {
   const sel = root.getElementById?.("langSelect") || document.getElementById("langSelect");
   if (sel) sel.value = lang;
 }
+
 
