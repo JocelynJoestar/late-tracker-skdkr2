@@ -132,44 +132,45 @@ const DICT = {
   }
 };
 
-
 export function getLang() {
-  return currentLang;
+  return localStorage.getItem("lang_prefect") || "en";
 }
 
 export function setLang(lang) {
-  currentLang = (lang === "ms") ? "ms" : "en";
-  localStorage.setItem(STORAGE_KEY, currentLang);
+  localStorage.setItem("lang_prefect", lang);
+  applyI18n(lang);
 }
 
 export function t(key) {
-  return DICT[currentLang]?.[key] ?? DICT.en?.[key] ?? "";
+  const lang = getLang();
+  return DICT[lang]?.[key] ?? DICT.en[key] ?? key;
 }
 
 export function applyI18n(root = document) {
-  root.querySelectorAll("[data-i18n]").forEach((el) => {
+  root.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
-    const val = t(key);
-    if (val) el.textContent = val;
-  });
+    const text = t(key);
 
-  // Also translate <option data-i18n="..."> labels (common gotcha)
-  root.querySelectorAll("option[data-i18n]").forEach((opt) => {
-    const key = opt.getAttribute("data-i18n");
-    const val = t(key);
-    if (val) opt.textContent = val;
+    if (text) el.textContent = text;
   });
 }
 
-export function bindLangDropdown(selectId = "langSelect", onChange) {
-  const sel = document.getElementById(selectId);
-  if (!sel) return;
-
-  sel.value = getLang();
-  sel.addEventListener("change", () => {
-    setLang(sel.value);
-    applyI18n(document);
-    if (typeof onChange === "function") onChange(getLang());
+  // Placeholders
+  document.querySelectorAll("[data-i18n-ph]").forEach(el => {
+    const key = el.getAttribute("data-i18n-ph");
+    el.setAttribute("placeholder", DICT[lang]?.[key] ?? DICT.en[key] ?? key);
   });
+
+  // Select options
+  document.querySelectorAll("option[data-i18n-opt]").forEach(opt => {
+    const key = opt.getAttribute("data-i18n-opt");
+    opt.textContent = DICT[lang]?.[key] ?? DICT.en[key] ?? key;
+  });
+
+  // Set dropdown value if exists
+  const sel = document.getElementById("langSelect");
+  if (sel) sel.value = lang;
 }
+
+
 
