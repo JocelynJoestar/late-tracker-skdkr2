@@ -56,6 +56,10 @@ const DICT = {
 
 /* <-----Teacher's-----> */
 
+   "teacher.title": "Discipline Teacher Dashboard",
+    "teacher.btn.logout": "Logout",
+
+    // filter
     "teacher.filter": "Filter",
     "teacher.range": "Range",
     "teacher.range.daily": "Daily (Today)",
@@ -65,6 +69,54 @@ const DICT = {
     "teacher.pickDate": "Pick Date",
     "teacher.btn.clear": "Clear",
     "teacher.pickDateHint": "Pick Date only works when Range = Specific Date",
+
+    "teacher.moreFilters": "More Filters",
+    "teacher.moreFiltersHint": "Tick level/class to narrow the result.",
+    "teacher.btn.filters": "Filters",
+
+    "teacher.levels": "Standards",
+    "teacher.classes": "Classes",
+    "teacher.btn.apply": "Apply Filters",
+    "teacher.btn.reset": "Reset",
+
+    // pills + generated labels
+    "teacher.pill.allLevels": "All Standards",
+    "teacher.pill.allClasses": "All Classes",
+    "teacher.pill.levelPrefix": "Standard",
+
+    // summary / ranges (JS builds these)
+    "teacher.rangeLabel.today": "Today",
+    "teacher.rangeLabel.last7": "Last 7 days",
+    "teacher.rangeLabel.thisMonth": "This month",
+    "teacher.rangeLabel.date": "Date",
+    "teacher.summary.totalLate": "Total Late",
+
+    // charts
+    "teacher.chart.barTitle.count": "Late Count by Class",
+    "teacher.chart.barTitle.pct": "Late % by Student (Selected Classes)",
+    "teacher.chart.doughnutTitle": "Late % by Level",
+
+    // frequency section
+    "teacher.freqTitle": "Student Late Frequency (by Class)",
+    "teacher.freqHint":
+      "Percent is based on total late records within the same class for the selected range.",
+    "teacher.total": "total",
+
+    // list section
+    "teacher.lateListTitle": "Late Students List (Grouped by Standard)",
+
+    // table headers (generated in JS)
+    "teacher.th.dateTime": "Date/Time",
+    "teacher.th.name": "Name",
+    "teacher.th.class": "Class",
+    "teacher.th.remark": "Remark",
+
+    "teacher.th.late": "Late",
+    "teacher.th.pct": "%",
+
+    // empty states (generated in JS)
+    "teacher.empty.noRecords": "No records for this filter.",
+    "teacher.empty.noNames": "No student names found in this range."
 
 
   },
@@ -168,4 +220,5 @@ export function applyI18n(lang = getLang()) {
   const sel = document.getElementById("langSelect");
   if (sel) sel.value = lang;
 }
+
 
