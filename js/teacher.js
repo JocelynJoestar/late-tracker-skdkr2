@@ -1,6 +1,6 @@
 import { db } from "./firebase.js";
 import { requireRole, attachLogout } from "./auth-guard.js";
-import { applyI18n, getLang, setLang, t } from "./i18n-teacher.js";
+import { applyI8n, getLang, setLang, t } from "./i8n-teacher.js";
 
 import {
   collection, query, where, orderBy, getDocs, Timestamp
@@ -65,17 +65,14 @@ function escapeHtml(s) {
     .replaceAll(">", "&gt;");
 }
 
-// ✅ robust remark translation (handles extra spaces)
 function remarkLabel(v) {
   const key = String(v || "").trim();
   if (!key.startsWith("remark.")) return key;
-
   const out = t(key);
   return (out && String(out).trim()) ? out : key;
 }
 
 function normalizeRecord(r) {
-  // Ensure consistent fields + numeric level
   const className = String(r.className ?? "").trim();
   const studentName = String(r.studentName ?? "").trim();
   const remark = String(r.remark ?? "").trim();
@@ -114,7 +111,6 @@ function getRangeFromDropdown(type) {
     const start = addDays(now, -7);
     return { start, end, label: "Last 7 days" };
   }
-  // monthly default
   return { start: startOfMonth(), end: now, label: "This month" };
 }
 
@@ -135,9 +131,9 @@ function groupBy(arr, keyFn) {
   return m;
 }
 
-// ===== Filter state =====
+// ===== Filters =====
 function getAllLevels() {
-  // ✅ Prevent "undefined" levels even if CLASSES is wrong/cached
+  // fixed: never show undefined; only 1..6
   return Array.from(
     new Set(
       CLASSES
@@ -155,19 +151,17 @@ function renderFilterCheckboxes() {
   const levels = getAllLevels();
   const classes = getAllClassNames();
 
-  // Levels
   levelFiltersEl.innerHTML = [
     `<label class="pill"><input type="checkbox" data-type="level" value="__ALL__" checked /><span class="all">All Levels</span></label>`,
     ...levels.map(l => `<label class="pill"><input type="checkbox" data-type="level" value="${l}" /><span>Level ${l}</span></label>`)
   ].join("");
 
-  // Classes
   classFiltersEl.innerHTML = [
     `<label class="pill"><input type="checkbox" data-type="class" value="__ALL__" checked /><span class="all">All Classes</span></label>`,
     ...classes.map(cn => `<label class="pill"><input type="checkbox" data-type="class" value="${escapeHtml(cn)}" /><span>${escapeHtml(cn)}</span></label>`)
   ].join("");
 
-  // checkbox behaviour: "All" exclusive
+  // "All" exclusive
   filterPanel.addEventListener("change", (e) => {
     const cb = e.target;
     if (!(cb instanceof HTMLInputElement)) return;
@@ -190,7 +184,6 @@ function renderFilterCheckboxes() {
       return;
     }
 
-    // if user unticks everything -> auto back to All
     const anyOtherChecked = others.some(x => x.checked);
     if (!anyOtherChecked && allBox) allBox.checked = true;
   });
@@ -254,13 +247,14 @@ function pickTopNamesForClass(records, cls, limit = 10) {
   return { pctMap, topNames: top.map(x => x.name) };
 }
 
-// ===== Build stats (Bar switches mode based on selected classes) =====
+// ===== Build stats =====
 function buildStats(records, selected) {
   const levelCounts = new Map();
   for (const r of records) {
     const lvl = String(r.level ?? 0);
     levelCounts.set(lvl, (levelCounts.get(lvl) || 0) + 1);
   }
+
   const levelNums = Array.from(levelCounts.keys()).sort((a, b) => Number(a) - Number(b));
   const levelLabels = levelNums.map(l => `Level ${l}`);
   const levelValues = levelNums.map(l => levelCounts.get(l));
@@ -540,7 +534,17 @@ async function loadRangeAndRender() {
     orderBy("dateTime", "desc")
   );
 
-  const snap = await getDocs(q);
+  let snap;
+  try {
+    snap = await getDocs(q);
+  } catch (err) {
+    console.error(err);
+    summaryEl.textContent = "Error loading records. Check Console (F12).";
+    listsEl.innerHTML = "";
+    if (studentStatsEl) studentStatsEl.innerHTML = "";
+    return;
+  }
+
   const all = snap.docs.map(d => normalizeRecord(d.data()));
 
   const selected = readSelectedFilters();
@@ -553,64 +557,65 @@ async function loadRangeAndRender() {
   renderStudentFrequency(filtered);
   renderLists(filtered);
 
-  // ✅ if you have any data-i18n labels in HTML, keep them updated too
-  try { applyI18n?.(document); } catch {}
+  // ✅ update any data-i18n labels in HTML
+  try { applyI8n?.(document); } catch {}
 }
 
 // ===== Init =====
 (async () => {
-  // ✅ i18n init (no dropdown)
   try {
+    // ✅ i8n init (no dropdown)
     const saved = getLang?.();
     if (!saved) setLang?.("en"); // change to "ms" if you want default Malay
-    applyI18n?.(document);
-  } catch (e) {
-    console.warn("i18n init skipped:", e);
-  }
+    applyI8n?.(document);
 
-  const { user, profile } = await requireRole(["teacher"]);
-  document.getElementById("whoami").textContent =
-    `${profile.displayName || "Teacher"} • ${user.email}`;
+    const { user, profile } = await requireRole(["teacher"]);
+    document.getElementById("whoami").textContent =
+      `${profile.displayName || "Teacher"} • ${user.email}`;
 
-  pickedDateEl.value = new Date().toISOString().slice(0, 10);
-
-  function syncDateEnabled() {
-    const isDate = rangeEl.value === "date";
-    pickedDateEl.disabled = !isDate;
-    clearDateBtn.disabled = !isDate;
-  }
-  syncDateEnabled();
-
-  clearDateBtn.addEventListener("click", () => {
     pickedDateEl.value = new Date().toISOString().slice(0, 10);
-  });
 
-  renderFilterCheckboxes();
-
-  toggleFiltersBtn.addEventListener("click", () => {
-    filterPanel.classList.toggle("open");
-  });
-
-  applyFiltersBtn.addEventListener("click", async () => {
-    await loadRangeAndRender();
-  });
-
-  resetFiltersBtn.addEventListener("click", async () => {
-    filterPanel.querySelectorAll(`input[type="checkbox"]`).forEach(cb => cb.checked = false);
-    filterPanel.querySelector(`input[data-type="level"][value="__ALL__"]`).checked = true;
-    filterPanel.querySelector(`input[data-type="class"][value="__ALL__"]`).checked = true;
-    await loadRangeAndRender();
-  });
-
-  rangeEl.addEventListener("change", async () => {
+    function syncDateEnabled() {
+      const isDate = rangeEl.value === "date";
+      pickedDateEl.disabled = !isDate;
+      clearDateBtn.disabled = !isDate;
+    }
     syncDateEnabled();
+
+    clearDateBtn.addEventListener("click", () => {
+      pickedDateEl.value = new Date().toISOString().slice(0, 10);
+    });
+
+    renderFilterCheckboxes();
+
+    toggleFiltersBtn.addEventListener("click", () => {
+      filterPanel.classList.toggle("open");
+    });
+
+    applyFiltersBtn.addEventListener("click", async () => {
+      await loadRangeAndRender();
+    });
+
+    resetFiltersBtn.addEventListener("click", async () => {
+      filterPanel.querySelectorAll(`input[type="checkbox"]`).forEach(cb => cb.checked = false);
+      filterPanel.querySelector(`input[data-type="level"][value="__ALL__"]`).checked = true;
+      filterPanel.querySelector(`input[data-type="class"][value="__ALL__"]`).checked = true;
+      await loadRangeAndRender();
+    });
+
+    rangeEl.addEventListener("change", async () => {
+      syncDateEnabled();
+      await loadRangeAndRender();
+    });
+
+    pickedDateEl.addEventListener("change", async () => {
+      if (rangeEl.value === "date") await loadRangeAndRender();
+    });
+
     await loadRangeAndRender();
-  });
-
-  pickedDateEl.addEventListener("change", async () => {
-    if (rangeEl.value === "date") await loadRangeAndRender();
-  });
-
-  await loadRangeAndRender();
+  } catch (err) {
+    console.error(err);
+    const msg = err?.message ? err.message : String(err);
+    if (summaryEl) summaryEl.textContent = `Error: ${msg}`;
+  }
 })();
-
