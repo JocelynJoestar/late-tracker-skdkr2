@@ -49,11 +49,11 @@ const DICT = {
     "teacher.pill.levelPrefix": "Level",
 
     // optional: summary labels if you later use them
-    "teacher.summary.totalLate": "Total Late",
+    "teacher.summary": "Total Late",
 
     // charts (only if you later use these keys)
-    "teacher.chart.barTitle.count": "Late Count by Class",
-    "teacher.chart.barTitle.pct": "Late % by Student (Selected Classes)",
+    "teacher.chart.barTitle": "Late Count by Class",
+    "teacher.chart.barTitle": "Late % by Student (Selected Classes)",
     "teacher.chart.doughnutTitle": "Late % by Level",
 
     // frequency
@@ -191,3 +191,4 @@ export function applyI8n(root = document) {
   const sel = root.getElementById?.("langSelect") || document.getElementById("langSelect");
   if (sel) sel.value = lang;
 }
+
