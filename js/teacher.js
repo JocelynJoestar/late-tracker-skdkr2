@@ -64,6 +64,15 @@ function escapeHtml(s) {
     .replaceAll(">", "&gt;");
 }
 
+function normalizeRecord(r) {
+  // Ensure consistent fields + numeric level
+  const className = String(r.className ?? "").trim();
+  const studentName = String(r.studentName ?? "").trim();
+  const remark = String(r.remark ?? "").trim();
+  const level = Number(r.level ?? 0);
+
+  return { ...r, className, studentName, remark, level };
+}
 
 function startOfDay(d) {
   const x = new Date(d);
@@ -118,10 +127,18 @@ function groupBy(arr, keyFn) {
 
 // ===== Filter state =====
 function getAllLevels() {
-  return Array.from(new Set(CLASSES.map(c => c.level))).sort((a, b) => a - b);
+  // ✅ Prevent "undefined" levels even if CLASSES is wrong/cached
+  return Array.from(
+    new Set(
+      CLASSES
+        .map(c => Number(c.level))
+        .filter(n => Number.isFinite(n) && n >= 1 && n <= 6)
+    )
+  ).sort((a, b) => a - b);
 }
+
 function getAllClassNames() {
-  return Array.from(new Set(CLASSES.map(c => c.className))).sort();
+  return Array.from(new Set(CLASSES.map(c => String(c.className)))).sort();
 }
 
 function renderFilterCheckboxes() {
@@ -296,15 +313,12 @@ function buildStats(records, selected) {
 
   return {
     total: records.length,
-
     levelLabels,
     levelValues,
-
     barMode,
     barTitle,
     barLabels,
     barDatasets,
-
     hideDoughnut
   };
 }
@@ -319,7 +333,6 @@ function renderCharts(stats) {
 
   const isPct = stats.barMode === "studentPctMulti";
 
-  // BAR (always visible)
   classBarChart = new Chart(ctxBar, {
     type: "bar",
     data: {
@@ -330,7 +343,7 @@ function renderCharts(stats) {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { display: isPct }, // show legend for multi-class %
+        legend: { display: isPct },
         tooltip: {
           callbacks: {
             label: (ctx) => isPct
@@ -346,7 +359,6 @@ function renderCharts(stats) {
             minRotation: 0,
             callback: function(value) {
               const label = this.getLabelForValue(value);
-              // shorten long names on axis
               return label.length > 14 ? label.slice(0, 14) + "…" : label;
             }
           }
@@ -362,7 +374,6 @@ function renderCharts(stats) {
     }
   });
 
-  // DOUGHNUT: hide only when exactly 1 class selected
   if (stats.hideDoughnut) {
     if (levelDoughnutCard) levelDoughnutCard.style.display = "none";
     return;
@@ -385,7 +396,7 @@ function renderCharts(stats) {
 
 // ===== Render lists =====
 function renderLists(records) {
-  const byLevel = groupBy(records, (r) => r.level ?? 0);
+  const byLevel = groupBy(records, (r) => Number(r.level ?? 0));
   const levels = Array.from(byLevel.keys()).sort((a, b) => a - b);
 
   if (records.length === 0) {
@@ -400,7 +411,7 @@ function renderLists(records) {
         <td class="cell-nowrap">${escapeHtml(dt)}</td>
         <td class="cell-wrap">${escapeHtml(r.studentName || "")}</td>
         <td class="cell-nowrap">${escapeHtml(r.className || "")}</td>
-        <td class="cell-wrap">${escapeHtml(translateRemark(r.remark || ""))}</td>
+        <td class="cell-wrap">${escapeHtml(r.remark || "")}</td>
       </tr>`;
     }).join("");
 
@@ -431,7 +442,7 @@ function renderLists(records) {
   }).join("");
 }
 
-// ===== Student frequency table (aligned, no bar column) =====
+// ===== Student frequency table =====
 function buildStudentFrequency(records) {
   const map = new Map();
 
@@ -535,7 +546,7 @@ async function loadRangeAndRender() {
   );
 
   const snap = await getDocs(q);
-  const all = snap.docs.map(d => d.data());
+  const all = snap.docs.map(d => normalizeRecord(d.data()));
 
   const selected = readSelectedFilters();
   const filtered = applyRecordFilters(all, selected);
@@ -557,7 +568,6 @@ async function loadRangeAndRender() {
   // Date picker default today
   pickedDateEl.value = new Date().toISOString().slice(0, 10);
 
-  // Enable date picker only for "date"
   function syncDateEnabled() {
     const isDate = rangeEl.value === "date";
     pickedDateEl.disabled = !isDate;
@@ -598,5 +608,3 @@ async function loadRangeAndRender() {
 
   await loadRangeAndRender();
 })();
-
-
