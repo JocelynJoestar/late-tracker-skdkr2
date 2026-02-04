@@ -177,6 +177,36 @@ const DICT = {
 
 
 /* <----Teacher's----> */
+// Teacher
+"teacher.title": "Papan Pemuka Guru Disiplin",
+"teacher.btn.logout": "Log Keluar",
+
+"teacher.filter": "Penapis",
+"teacher.range": "Tempoh",
+"teacher.range.daily": "Harian (Hari ini)",
+"teacher.range.weekly": "Mingguan (7 hari lepas)",
+"teacher.range.monthly": "Bulanan (Bulan ini)",
+"teacher.range.date": "Tarikh Tertentu",
+
+"teacher.pickDate": "Pilih Tarikh",
+"teacher.btn.clear": "Kosongkan",
+"teacher.pickDateHint": "Pilih Tarikh hanya berfungsi bila Tempoh = Tarikh Tertentu",
+
+"teacher.moreFilters": "Penapis Tambahan",
+"teacher.moreFiltersHint": "Tanda tahap/kelas untuk tapis keputusan.",
+"teacher.btn.filters": "Penapis",
+"teacher.btn.apply": "Guna Penapis",
+"teacher.btn.reset": "Reset",
+
+"teacher.summary": "Ringkasan",
+
+"teacher.chart.barTitle": "Jumlah Lewat Mengikut Kelas",
+"teacher.chart.doughnutTitle": "% Lewat Mengikut Tahap",
+
+"teacher.freqTitle": "Kekerapan Lewat Murid (Mengikut Kelas)",
+"teacher.freqHint": "Peratus dikira berdasarkan jumlah rekod lewat dalam kelas yang sama untuk tempoh dipilih.",
+
+"teacher.lateListTitle": "Senarai Murid Lewat (Mengikut Tahap)",
 
 
   }
@@ -220,5 +250,6 @@ export function applyI18n(lang = getLang()) {
   const sel = document.getElementById("langSelect");
   if (sel) sel.value = lang;
 }
+
 
 
