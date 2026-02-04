@@ -1,11 +1,22 @@
-// ./js/i18n-teacher.js
-const STORAGE_KEY = "lang_teacher"; // separate key for teacher
-let currentLang = localStorage.getItem(STORAGE_KEY) || "en";
-
 const DICT = {
   en: {
-    // page
-    "teacher.title": "Discipline Teacher Dashboard",
+  
+"remark.woke": "Woke up late",
+"remark.alarm": "Alarm didn’t ring / battery died",
+"remark.slow": "Took too long to get ready (shower/clothes/bag)",
+"remark.forgot": "Forgot school items",
+"remark.parents": "Parent/guardian got ready late / sent late",
+"remark.bus": "School bus/van late / didn’t come",
+"remark.traffic": "Traffic jam / congested road",
+"remark.weather": "Bad weather (heavy rain/flood)",
+"remark.sick": "Mild sickness / not feeling well",
+"remark.family": "Morning family matter (send sibling, emergency)",
+"remark.other": "Other (type your own)",
+"remark.otherPh": "Type other reason…",
+
+/* <-----Teacher's-----> */
+
+   "teacher.title": "Discipline Teacher Dashboard",
     "teacher.btn.logout": "Logout",
 
     // filter
@@ -66,64 +77,61 @@ const DICT = {
     // empty states (generated in JS)
     "teacher.empty.noRecords": "No records for this filter.",
     "teacher.empty.noNames": "No student names found in this range."
+
+
   },
 
   ms: {
-    "teacher.title": "Papan Pemuka Guru Disiplin",
-    "teacher.btn.logout": "Log Keluar",
+"remark.woke": "Bangun lewat",
+"remark.alarm": "Alarm tak berbunyi / habis bateri",
+"remark.slow": "Lambat siap (mandi/pakaian/beg)",
+"remark.forgot": "Tertinggal barang sekolah",
+"remark.parents": "Ibu bapa/penjaga lambat bersiap / lewat hantar",
+"remark.bus": "Bas/van sekolah lewat / tak datang",
+"remark.traffic": "Jem trafik / jalan sesak",
+"remark.weather": "Cuaca buruk (hujan lebat/banjir)",
+"remark.sick": "Sakit ringan / kurang sihat",
+"remark.family": "Urusan keluarga pagi (hantar adik, kecemasan)",
+"remark.other": "Lain-lain (taip sendiri)",
+"remark.otherPh": "Taip sebab lain…",
 
-    "teacher.filter": "Penapis",
-    "teacher.range": "Julat",
-    "teacher.range.daily": "Harian (Hari ini)",
-    "teacher.range.weekly": "Mingguan (7 hari lepas)",
-    "teacher.range.monthly": "Bulanan (Bulan ini)",
-    "teacher.range.date": "Tarikh Tertentu",
-    "teacher.pickDate": "Pilih Tarikh",
-    "teacher.btn.clear": "Kosongkan",
-    "teacher.pickDateHint": "Pilih Tarikh hanya berfungsi bila Julat = Tarikh Tertentu",
 
-    "teacher.moreFilters": "Penapis Tambahan",
-    "teacher.moreFiltersHint": "Tanda tahap/kelas untuk kecilkan carian.",
-    "teacher.btn.filters": "Penapis",
+/* <----Teacher's----> */
+// Teacher
+"teacher.title": "Papan Pemuka Guru Disiplin",
+"teacher.btn.logout": "Log Keluar",
 
-    "teacher.levels": "Darjah",
-    "teacher.classes": "Kelas",
-    "teacher.btn.apply": "Guna Penapis",
-    "teacher.btn.reset": "Set Semula",
+"teacher.filter": "Penapis",
+"teacher.range": "Tempoh",
+"teacher.range.daily": "Harian (Hari ini)",
+"teacher.range.weekly": "Mingguan (7 hari lepas)",
+"teacher.range.monthly": "Bulanan (Bulan ini)",
+"teacher.range.date": "Tarikh Tertentu",
 
-    "teacher.pill.allLevels": "Semua Darjah",
-    "teacher.pill.allClasses": "Semua Kelas",
-    "teacher.pill.levelPrefix": "Darjah",
+"teacher.pickDate": "Pilih Tarikh",
+"teacher.btn.clear": "Kosongkan",
+"teacher.pickDateHint": "Pilih Tarikh hanya berfungsi bila Tempoh = Tarikh Tertentu",
 
-    "teacher.rangeLabel.today": "Hari ini",
-    "teacher.rangeLabel.last7": "7 hari lepas",
-    "teacher.rangeLabel.thisMonth": "Bulan ini",
-    "teacher.rangeLabel.date": "Tarikh",
-    "teacher.summary.totalLate": "Jumlah Lewat",
+"teacher.moreFilters": "Penapis Tambahan",
+"teacher.moreFiltersHint": "Tanda tahap/kelas untuk tapis keputusan.",
+"teacher.btn.filters": "Penapis",
+"teacher.btn.apply": "Guna Penapis",
+"teacher.btn.reset": "Reset",
 
-    "teacher.chart.barTitle.count": "Jumlah Lewat Mengikut Kelas",
-    "teacher.chart.barTitle.pct": "% Lewat Mengikut Murid (Kelas Dipilih)",
-    "teacher.chart.doughnutTitle": "% Lewat Mengikut Tahap",
+"teacher.summary": "Ringkasan",
 
-    "teacher.freqTitle": "Kekerapan Lewat Murid (mengikut Kelas)",
-    "teacher.freqHint":
-      "Peratus dikira berdasarkan jumlah rekod lewat dalam kelas yang sama bagi julat dipilih.",
-    "teacher.total": "jumlah",
+"teacher.chart.barTitle": "Jumlah Lewat Mengikut Kelas",
+"teacher.chart.doughnutTitle": "% Lewat Mengikut Tahap",
 
-    "teacher.lateListTitle": "Senarai Murid Lewat (Mengikut Darjah)",
+"teacher.freqTitle": "Kekerapan Lewat Murid (Mengikut Kelas)",
+"teacher.freqHint": "Peratus dikira berdasarkan jumlah rekod lewat dalam kelas yang sama untuk tempoh dipilih.",
 
-    "teacher.th.dateTime": "Tarikh/Masa",
-    "teacher.th.name": "Nama",
-    "teacher.th.class": "Kelas",
-    "teacher.th.remark": "Catatan",
+"teacher.lateListTitle": "Senarai Murid Lewat (Mengikut Tahap)",
 
-    "teacher.th.late": "Lewat",
-    "teacher.th.pct": "%",
 
-    "teacher.empty.noRecords": "Tiada rekod untuk penapis ini.",
-    "teacher.empty.noNames": "Tiada nama murid ditemui dalam julat ini."
   }
 };
+
 
 export function getLang() {
   return currentLang;
@@ -164,3 +172,4 @@ export function bindLangDropdown(selectId = "langSelect", onChange) {
     if (typeof onChange === "function") onChange(getLang());
   });
 }
+
