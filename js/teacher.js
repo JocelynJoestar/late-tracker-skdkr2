@@ -64,10 +64,6 @@ function escapeHtml(s) {
     .replaceAll(">", "&gt;");
 }
 
-function translateRemark(raw) {
-  const val = String(raw || "");
-  return val.startsWith("remark.") ? (t(val) || val) : val;
-}
 
 function startOfDay(d) {
   const x = new Date(d);
@@ -602,4 +598,5 @@ async function loadRangeAndRender() {
 
   await loadRangeAndRender();
 })();
+
 
