@@ -1,6 +1,6 @@
 import { db } from "./firebase.js";
 import { requireRole, attachLogout } from "./auth-guard.js";
-import { applyI18n, getLang, setLang, t } from "./i18n.js";
+import { applyI18n, getLang, setLang, t } from "./i18n-teacher.js";
 
 import {
   collection, query, where, orderBy, getDocs, Timestamp
@@ -613,3 +613,4 @@ async function loadRangeAndRender() {
 
   await loadRangeAndRender();
 })();
+
