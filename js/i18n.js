@@ -227,12 +227,14 @@ export function t(key) {
   return DICT[lang]?.[key] ?? DICT.en[key] ?? key;
 }
 
-export function applyI18n(lang = getLang()) {
-  // Text nodes
-  document.querySelectorAll("[data-i18n]").forEach(el => {
+export function applyI18n(root = document) {
+  root.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
-    el.textContent = DICT[lang]?.[key] ?? DICT.en[key] ?? key;
+    const text = t(key);
+
+    if (text) el.textContent = text;
   });
+}
 
   // Placeholders
   document.querySelectorAll("[data-i18n-ph]").forEach(el => {
@@ -250,6 +252,7 @@ export function applyI18n(lang = getLang()) {
   const sel = document.getElementById("langSelect");
   if (sel) sel.value = lang;
 }
+
 
 
 
