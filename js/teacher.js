@@ -1,7 +1,6 @@
 import { db } from "./firebase.js";
 import { requireRole, attachLogout } from "./auth-guard.js";
-import { t } from "./i18n.js";
-
+import { applyI18n, getLang, setLang, t } from "./i18n.js";
 
 import {
   collection, query, where, orderBy, getDocs, Timestamp
@@ -66,11 +65,14 @@ function escapeHtml(s) {
     .replaceAll(">", "&gt;");
 }
 
+// ✅ robust remark translation (handles extra spaces)
 function remarkLabel(v) {
-  const s = String(v || "");
-  return s.startsWith("remark.") ? (t(s) || s) : s;
-}
+  const key = String(v || "").trim();
+  if (!key.startsWith("remark.")) return key;
 
+  const out = t(key);
+  return (out && String(out).trim()) ? out : key;
+}
 
 function normalizeRecord(r) {
   // Ensure consistent fields + numeric level
@@ -254,7 +256,6 @@ function pickTopNamesForClass(records, cls, limit = 10) {
 
 // ===== Build stats (Bar switches mode based on selected classes) =====
 function buildStats(records, selected) {
-  // Doughnut: late count by level
   const levelCounts = new Map();
   for (const r of records) {
     const lvl = String(r.level ?? 0);
@@ -268,13 +269,9 @@ function buildStats(records, selected) {
   const chosenClasses = selected.classes || [];
   const exactlyOneClass = !classAll && chosenClasses.length === 1;
 
-  // Hide doughnut when exactly 1 class is selected
   const hideDoughnut = exactlyOneClass;
 
-  // Bar mode:
-  // - classAll => class counts
-  // - selected 1+ classes => student % grouped by class
-  let barMode = "classCount"; // or "studentPctMulti"
+  let barMode = "classCount";
   let barTitle = "Late Count by Class";
   let barLabels = [];
   let barDatasets = [];
@@ -292,7 +289,6 @@ function buildStats(records, selected) {
       res.topNames.forEach(n => nameSet.add(n));
     }
 
-    // Stable labels (alphabetical)
     barLabels = Array.from(nameSet).sort((a, b) => a.localeCompare(b));
 
     barDatasets = perClass.map(({ cls, pctMap }) => ({
@@ -300,7 +296,6 @@ function buildStats(records, selected) {
       data: barLabels.map(n => pctMap.get(n) || 0)
     }));
   } else {
-    // Default bar: late count by class
     const classCounts = new Map();
     for (const r of records) {
       const cls = String(r.className ?? "");
@@ -343,10 +338,7 @@ function renderCharts(stats) {
 
   classBarChart = new Chart(ctxBar, {
     type: "bar",
-    data: {
-      labels: stats.barLabels,
-      datasets: stats.barDatasets
-    },
+    data: { labels: stats.barLabels, datasets: stats.barDatasets },
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -374,9 +366,7 @@ function renderCharts(stats) {
         y: {
           beginAtZero: true,
           ...(isPct ? { max: 100 } : {}),
-          ticks: {
-            callback: (v) => isPct ? `${v}%` : v
-          }
+          ticks: { callback: (v) => isPct ? `${v}%` : v }
         }
       }
     }
@@ -390,10 +380,7 @@ function renderCharts(stats) {
 
   levelDoughnutChart = new Chart(ctxD, {
     type: "doughnut",
-    data: {
-      labels: stats.levelLabels,
-      datasets: [{ data: stats.levelValues }]
-    },
+    data: { labels: stats.levelLabels, datasets: [{ data: stats.levelValues }] },
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -565,15 +552,26 @@ async function loadRangeAndRender() {
   renderCharts(stats);
   renderStudentFrequency(filtered);
   renderLists(filtered);
+
+  // ✅ if you have any data-i18n labels in HTML, keep them updated too
+  try { applyI18n?.(document); } catch {}
 }
 
 // ===== Init =====
 (async () => {
+  // ✅ i18n init (no dropdown)
+  try {
+    const saved = getLang?.();
+    if (!saved) setLang?.("en"); // change to "ms" if you want default Malay
+    applyI18n?.(document);
+  } catch (e) {
+    console.warn("i18n init skipped:", e);
+  }
+
   const { user, profile } = await requireRole(["teacher"]);
   document.getElementById("whoami").textContent =
     `${profile.displayName || "Teacher"} • ${user.email}`;
 
-  // Date picker default today
   pickedDateEl.value = new Date().toISOString().slice(0, 10);
 
   function syncDateEnabled() {
@@ -587,7 +585,6 @@ async function loadRangeAndRender() {
     pickedDateEl.value = new Date().toISOString().slice(0, 10);
   });
 
-  // Filters UI
   renderFilterCheckboxes();
 
   toggleFiltersBtn.addEventListener("click", () => {
@@ -616,4 +613,3 @@ async function loadRangeAndRender() {
 
   await loadRangeAndRender();
 })();
-
