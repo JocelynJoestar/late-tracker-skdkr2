@@ -56,6 +56,15 @@ const DICT = {
 
 /* <-----Teacher's-----> */
 
+    "teacher.filter": "Filter",
+    "teacher.range": "Range",
+    "teacher.range.daily": "Daily (Today)",
+    "teacher.range.weekly": "Weekly (Last 7 days)",
+    "teacher.range.monthly": "Monthly (This month)",
+    "teacher.range.date": "Specific Date",
+    "teacher.pickDate": "Pick Date",
+    "teacher.btn.clear": "Clear",
+    "teacher.pickDateHint": "Pick Date only works when Range = Specific Date",
 
 
   },
@@ -159,3 +168,4 @@ export function applyI18n(lang = getLang()) {
   const sel = document.getElementById("langSelect");
   if (sel) sel.value = lang;
 }
+
