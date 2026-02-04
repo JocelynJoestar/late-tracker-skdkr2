@@ -9,29 +9,29 @@ attachLogout();
 
 /** Keep this list consistent with Prefect page */
 const CLASSES = [
-  { className: "1 Dinamik", standard: 1 },
-  { className: "1 Kreatif", standard: 1 },
-  { className: "1 Setia", standard: 1 },
+  { className: "1 Dinamik", level: 1 },
+  { className: "1 Kreatif", level: 1 },
+  { className: "1 Setia", level: 1 },
 
-  { className: "2 Dinamik", standard: 2 },
-  { className: "2 Kreatif", standard: 2 },
-  { className: "2 Setia", standard: 2 },
+  { className: "2 Dinamik", level: 2 },
+  { className: "2 Kreatif", level: 2 },
+  { className: "2 Setia", level: 2 },
 
-  { className: "3 Dinamik", standard: 3 },
-  { className: "3 Kreatif", standard: 3 },
-  { className: "3 Setia", standard: 3 },
+  { className: "3 Dinamik", level: 3 },
+  { className: "3 Kreatif", level: 3 },
+  { className: "3 Setia", level: 3 },
 
-  { className: "4 Dinamik", standard: 4 },
-  { className: "4 Kreatif", standard: 4 },
-  { className: "4 Setia", standard: 4 },
+  { className: "4 Dinamik", level: 4 },
+  { className: "4 Kreatif", level: 4 },
+  { className: "4 Setia", level: 4 },
 
-  { className: "5 Dinamik", standard: 5 },
-  { className: "5 Kreatif", standard: 5 },
-  { className: "5 Setia", standard: 5 },
+  { className: "5 Dinamik", level: 5 },
+  { className: "5 Kreatif", level: 5 },
+  { className: "5 Setia", level: 5 },
 
-  { className: "6 Dinamik", standard: 6 },
-  { className: "6 Kreatif", standard: 6 },
-  { className: "6 Setia", Standard: 6 }
+  { className: "6 Dinamik", level: 6 },
+  { className: "6 Kreatif", level: 6 },
+  { className: "6 Setia", level: 6 }
 ];
 
 // ===== Elements =====
@@ -602,3 +602,4 @@ async function loadRangeAndRender() {
 
   await loadRangeAndRender();
 })();
+
