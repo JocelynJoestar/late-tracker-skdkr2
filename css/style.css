@@ -130,4 +130,46 @@ table td:nth-child(3) {
 }
 
 
+/* =========================
+   Teacher table: Mobile UI
+   Keep Remark in ONE line
+   ========================= */
+@media (max-width: 520px) {
+  /* stop per-letter breaking on mobile tables */
+  .fixed-table td,
+  .fixed-table th {
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+  }
+
+  /* Date/Time tighter */
+  .fixed-table th:nth-child(1),
+  .fixed-table td:nth-child(1) {
+    white-space: nowrap;
+    max-width: 120px;
+  }
+
+  /* Name can wrap if long */
+  .fixed-table th:nth-child(2),
+  .fixed-table td:nth-child(2) {
+    white-space: normal;
+    overflow-wrap: break-word;
+  }
+
+  /* Class stay one line */
+  .fixed-table th:nth-child(3),
+  .fixed-table td:nth-child(3) {
+    white-space: nowrap;
+  }
+
+  /* ✅ Remark: force ONE line + show ... if too long */
+  .fixed-table th:nth-child(4),
+  .fixed-table td:nth-child(4) {
+    white-space: nowrap !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px; /* adjust: 140/180 if you want */
+  }
+}
+
 
