@@ -6,10 +6,9 @@
   <link rel="stylesheet" href="./css/style.css" />
   <title>Late Tracker - Teacher</title>
 
-  <!-- Extra styles for filters + charts -->
   <style>
     /* --- Filter header --- */
-    .filter-toggle {
+    .filter-toggle{
       display:flex;
       justify-content:space-between;
       align-items:center;
@@ -17,114 +16,106 @@
     }
 
     /* --- Panel --- */
-    .filter-panel {
+    .filter-panel{
       display:none;
       margin-top:14px;
       padding-top:12px;
       border-top:1px solid rgba(0,0,0,.06);
     }
-    .filter-panel.open { display:block; }
+    .filter-panel.open{ display:block; }
 
-    /* --- Pills grid (default: wraps nicely) --- */
-    .pill-grid {
+    /* --- Pills grid --- */
+    .pill-grid{
       display:flex;
       flex-wrap:wrap;
       gap:10px;
     }
 
-    /* ===== Pill checkbox (cross-device safe: iOS + Android + desktop) ===== */
-    .pill {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      cursor: pointer;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
+    /* ===== Pills (cross-device safe) ===== */
+    .pill{
+      position:relative;
+      display:inline-flex;
+      align-items:center;
+      cursor:pointer;
+      user-select:none;
+      -webkit-tap-highlight-color:transparent;
+      touch-action:manipulation;
     }
 
-    /* Hide ALL native checkbox/radio UI (prevents weird switches on iOS/Android) */
-    .pill input {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-      width: 1px;
-      height: 1px;
-      margin: 0;
+    .pill input{
+      position:absolute;
+      opacity:0;
+      pointer-events:none;
+      width:1px;
+      height:1px;
+      margin:0;
     }
 
-    .pill span {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 10px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(0,0,0,.10);
-      background: #fff;
-      font-weight: 600;
-      font-size: 13px;
-      line-height: 1;
-      transition: 120ms ease;
-      white-space: nowrap;
+    .pill span{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:10px 12px;
+      border-radius:999px;
+      border:1px solid rgba(0,0,0,.10);
+      background:#fff;
+      font-weight:600;
+      font-size:13px;
+      line-height:1;
+      transition:120ms ease;
+      white-space:nowrap;
+      width:100%;
     }
 
-    /* checked style */
-    .pill input:checked + span {
-      background: rgba(0,0,0,.08);
-      border-color: rgba(0,0,0,.18);
+    .pill input:checked + span{
+      background:rgba(0,0,0,.08);
+      border-color:rgba(0,0,0,.18);
     }
 
-    /* "All" pills stand out */
-    .pill span.all {
-      border-color: rgba(0,0,0,.14);
+    .pill span.all{
+      border-color:rgba(0,0,0,.14);
     }
-    .pill input:checked + span.all {
-      background: rgba(0,0,0,.75);
-      border-color: rgba(0,0,0,.75);
+    .pill input:checked + span.all{
+      background:rgba(0,0,0,.75);
+      border-color:rgba(0,0,0,.75);
       color:#fff;
     }
 
-    /* hover (desktop only feel) */
-    .pill:hover span {
-      border-color: rgba(0,0,0,.22);
+    .pill:hover span{
+      border-color:rgba(0,0,0,.22);
     }
 
-    /* keyboard accessibility */
-    .pill input:focus-visible + span {
-      outline: 3px solid rgba(0,0,0,.18);
-      outline-offset: 2px;
+    .pill input:focus-visible + span{
+      outline:3px solid rgba(0,0,0,.18);
+      outline-offset:2px;
     }
 
     /* Actions row */
-    .filter-actions {
+    .filter-actions{
       margin-top:14px;
       display:flex;
       gap:10px;
       flex-wrap:wrap;
     }
 
-    /* Small helpers */
-    .nowrap { white-space:nowrap; }
-    .muted { color:rgba(0,0,0,.55); }
+    .nowrap{ white-space:nowrap; }
+    .muted{ color:rgba(0,0,0,.55); }
 
     /* ===== Charts layout (stacked) ===== */
-    .charts-stack {
+    .charts-stack{
       display:flex;
       flex-direction:column;
       gap:12px;
       margin-top:12px;
     }
 
-    .chart-box {
+    .chart-box{
       position:relative;
       width:100%;
     }
 
-    /* Bigger bar chart (top) */
-    .chart-box--bar { height:340px; }
-
-    /* Bigger pie/doughnut (bottom) */
-    .chart-box--pie { height:420px; }
+    .chart-box--bar{ height:340px; }
+    .chart-box--pie{ height:420px; }
 
     .chart-box canvas{
       width:100% !important;
@@ -132,66 +123,100 @@
       display:block;
     }
 
-    /* Make tables consistent + stop columns shifting */
-    .fixed-table {
-      width: 100%;
-      table-layout: fixed;
+    /* ✅ Horizontal scroll for bar chart */
+    .chart-scroll{
+      overflow-x:auto;
+      overflow-y:hidden;
+      -webkit-overflow-scrolling:touch;
+    }
+    .chart-scroll-inner{
+      height:100%;
+      min-width:100%;
+    }
+    .chart-scroll canvas{
+      height:100% !important;
+      display:block;
+    }
+
+    /* ===== Tables ===== */
+    .fixed-table{
+      width:100%;
+      table-layout:fixed;
     }
 
     .fixed-table td,
-    .fixed-table th {
-      vertical-align: top;
-      word-break: break-word;
-      overflow-wrap: anywhere;
+    .fixed-table th{
+      vertical-align:top;
+      /* default desktop behavior */
+      word-break:break-word;
+      overflow-wrap:anywhere;
     }
 
-    .fixed-table th { white-space: nowrap; }
-    .cell-nowrap { white-space: nowrap; }
-    .cell-wrap { white-space: normal; }
+    .fixed-table th{ white-space:nowrap; }
+    .cell-nowrap{ white-space:nowrap; }
+    .cell-wrap{ white-space:normal; }
 
-    /* ===== Mobile improvements (ALL devices) ===== */
-    @media (max-width: 520px) {
-      /* Better spacing */
-      .filter-toggle {
-        align-items: flex-start;
-      }
-
-      /* Turn pills into a neat grid instead of messy wrap */
-      .pill-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
-      }
-
-      .pill { width: 100%; }
-      .pill span { width: 100%; } /* makes pill full width in grid cell */
-
-      /* Buttons become thumb-friendly */
-      .filter-actions {
-        flex-direction: column;
-      }
-      .filter-actions button {
-        width: 100%;
-      }
-
-      /* Charts: reduce height so phone doesn't feel endless */
-      .chart-box--bar { height: 280px; }
-      .chart-box--pie { height: 320px; }
+    /* ✅ Always make table horizontally scrollable (so Remark never disappears) */
+    .table-scroll{
+      width:100%;
+      overflow-x:auto;
+      overflow-y:hidden;
+      -webkit-overflow-scrolling:touch;
     }
 
-    /* Extra small phones */
-    @media (max-width: 360px) {
-      .pill-grid {
-        grid-template-columns: 1fr; /* single column for very small screens */
+    /* ===== Mobile improvements ===== */
+    @media (max-width: 520px){
+      .filter-toggle{ align-items:flex-start; }
+
+      .pill-grid{
+        display:grid;
+        grid-template-columns:repeat(2, minmax(0, 1fr));
+        gap:10px;
+      }
+      .pill{ width:100%; }
+
+      .filter-actions{
+        flex-direction:column;
+      }
+      .filter-actions button{ width:100%; }
+
+      .chart-box--bar{ height:280px; }
+      .chart-box--pie{ height:320px; }
+
+      /* ✅ Fix remark issue properly on mobile:
+         - stop per-letter break
+         - keep Remark in 1 line
+         - ensure table has enough width so column 4 exists (scrollable) */
+      .fixed-table td,
+      .fixed-table th{
+        word-break:normal !important;
+        overflow-wrap:normal !important;
+      }
+
+      /* ensure the table is wide enough for 4 columns (swipe to see Remark) */
+      .table-scroll .fixed-table{
+        min-width:640px; /* adjust 600-760 depending on your preference */
+      }
+
+      /* Class stays one line */
+      .fixed-table th:nth-child(3),
+      .fixed-table td:nth-child(3){
+        white-space:nowrap !important;
+      }
+
+      /* ✅ Remark = column 4, force ONE line */
+      .fixed-table th:nth-child(4),
+      .fixed-table td:nth-child(4){
+        white-space:nowrap !important;
+        overflow:hidden;
+        text-overflow:ellipsis;
+        max-width:220px;
       }
     }
 
-  /* keep Class in 1 line */
-  .fixed-table th:nth-child(3),
-  .fixed-table td:nth-child(3){
-    white-space: nowrap !important;
-  }
-}
+    @media (max-width: 360px){
+      .pill-grid{ grid-template-columns:1fr; }
+    }
   </style>
 </head>
 
@@ -272,16 +297,16 @@
       <div id="summary" class="small muted">Loading…</div>
     </div>
 
-    <!-- Charts (STACKED) -->
+    <!-- Charts -->
     <div class="charts-stack">
-     <div class="card">
-  <h2 id="barTitle" data-i18n="teacher.chart.barTitle" style="margin:0 0 10px;">Late Count by Class</h2>
-  <!--  Scroll container -->
-  <div class="chart-box chart-box--bar chart-scroll">
-    <div class="chart-scroll-inner">
-      <canvas id="classBar"></canvas>
-    </div>
-  </div>
+      <div class="card">
+        <h2 id="barTitle" data-i18n="teacher.chart.barTitle" style="margin:0 0 10px;">Late Count by Class</h2>
+        <div class="chart-box chart-box--bar chart-scroll">
+          <div class="chart-scroll-inner">
+            <canvas id="classBar"></canvas>
+          </div>
+        </div>
+      </div>
 
       <div class="card" id="levelDoughnutCard">
         <h2 id="doughnutTitle" data-i18n="teacher.chart.doughnutTitle" style="margin:0 0 10px;">Late % by Level</h2>
@@ -308,12 +333,7 @@
     </div>
   </div>
 
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="./js/teacher.js"></script>
 </body>
 </html>
-
-
-
-
