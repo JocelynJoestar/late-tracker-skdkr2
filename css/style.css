@@ -103,5 +103,31 @@ table td:nth-child(3) {
   display: block;
 }
 
+/* Fix Remark breaking letter-by-letter on mobile */
+.fixed-table th:nth-child(3),
+.fixed-table td:nth-child(3){
+  width: 34%;
+  min-width: 120px;       /* give remark some space */
+}
+
+.fixed-table td:nth-child(3){
+  overflow-wrap: break-word; /* break by word when possible */
+  word-break: normal;        /* stop per-letter breaking */
+  white-space: normal;
+  hyphens: auto;
+}
+
+/* Optional: keep Name from taking too much space */
+.fixed-table th:nth-child(1),
+.fixed-table td:nth-child(1){
+  width: 46%;
+}
+
+.fixed-table th:nth-child(2),
+.fixed-table td:nth-child(2){
+  width: 20%;
+  white-space: nowrap;
+}
+
 
 
