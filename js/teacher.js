@@ -320,15 +320,55 @@ function buildStats(records, selected) {
   };
 }
 
+function setupScrollableBarCanvas(labels) {
+  const canvas = document.getElementById("classBar");
+  if (!canvas) return;
+
+  // Your HTML will wrap the canvas in .chart-scroll / .chart-scroll-inner
+  const inner = canvas.closest(".chart-scroll-inner");
+
+  // Reset to default first (so switching filters doesn't keep old width)
+  canvas.style.width = "100%";
+  canvas.removeAttribute("width");
+  if (inner) inner.style.minWidth = "100%";
+
+  const count = Array.isArray(labels) ? labels.length : 0;
+
+  // Only widen/scroll when there are many bars
+  // (You can change 6 -> 8 if you want later)
+  if (count <= 6) return;
+
+  // Bar spacing (feel free to tweak)
+  const pxPerBar = 80;   // bigger = more spacing per class
+  const minWidth = 520;  // minimum for nice look
+
+  const desiredWidth = Math.max(minWidth, count * pxPerBar);
+
+  // This makes the canvas physically wider so user can swipe horizontally
+  canvas.style.width = desiredWidth + "px";
+  canvas.width = desiredWidth; // important: sharp rendering
+
+  if (inner) inner.style.minWidth = desiredWidth + "px";
+}
+
+
 // ===== Render charts =====
 function renderCharts(stats) {
   const ctxBar = document.getElementById("classBar");
   const ctxD = document.getElementById("levelDoughnut");
 
+  // Update bar chart title dynamically
+  const barTitleEl = document.getElementById("barTitle");
+  if (barTitleEl) barTitleEl.textContent = stats.barTitle;
+
   if (classBarChart) classBarChart.destroy();
   if (levelDoughnutChart) levelDoughnutChart.destroy();
 
   const isPct = stats.barMode === "studentPctMulti";
+
+  // ✅ Make bar chart scrollable on mobile when many labels
+  // Works for ALL devices because it's just CSS overflow + a wider canvas
+  setupScrollableBarCanvas(stats.barLabels);
 
   classBarChart = new Chart(ctxBar, {
     type: "bar",
@@ -349,6 +389,7 @@ function renderCharts(stats) {
       scales: {
         x: {
           ticks: {
+            autoSkip: false, // ✅ show ALL labels (no skipping)
             maxRotation: 0,
             minRotation: 0,
             callback: function(value) {
@@ -619,3 +660,4 @@ async function loadRangeAndRender() {
     if (summaryEl) summaryEl.textContent = `Error: ${msg}`;
   }
 })();
+
