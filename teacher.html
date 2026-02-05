@@ -185,6 +185,31 @@
         grid-template-columns: 1fr; /* single column for very small screens */
       }
     }
+
+    /* ✅ FORCE Remark to stay 1 line on mobile (override inline rules) */
+@media (max-width: 520px){
+  /* stop the per-letter breaking from earlier inline CSS */
+  .fixed-table td,
+  .fixed-table th{
+    overflow-wrap: normal !important;
+    word-break: normal !important;
+  }
+
+  /* ✅ Remark is column 4 (Date/Time, Name, Class, Remark) */
+  .fixed-table th:nth-child(4),
+  .fixed-table td:nth-child(4){
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 160px;  /* adjust 140-220 if you want */
+  }
+
+  /* keep Class in 1 line */
+  .fixed-table th:nth-child(3),
+  .fixed-table td:nth-child(3){
+    white-space: nowrap !important;
+  }
+}
   </style>
 </head>
 
@@ -306,5 +331,6 @@
   <script type="module" src="./js/teacher.js"></script>
 </body>
 </html>
+
 
 
