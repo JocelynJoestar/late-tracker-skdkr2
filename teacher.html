@@ -41,7 +41,6 @@
       -webkit-tap-highlight-color:transparent;
       touch-action:manipulation;
     }
-
     .pill input{
       position:absolute;
       opacity:0;
@@ -50,7 +49,6 @@
       height:1px;
       margin:0;
     }
-
     .pill span{
       display:inline-flex;
       align-items:center;
@@ -66,28 +64,15 @@
       white-space:nowrap;
       width:100%;
     }
-
     .pill input:checked + span{
       background:rgba(0,0,0,.08);
       border-color:rgba(0,0,0,.18);
     }
-
-    .pill span.all{
-      border-color:rgba(0,0,0,.14);
-    }
+    .pill span.all{ border-color:rgba(0,0,0,.14); }
     .pill input:checked + span.all{
       background:rgba(0,0,0,.75);
       border-color:rgba(0,0,0,.75);
       color:#fff;
-    }
-
-    .pill:hover span{
-      border-color:rgba(0,0,0,.22);
-    }
-
-    .pill input:focus-visible + span{
-      outline:3px solid rgba(0,0,0,.18);
-      outline-offset:2px;
     }
 
     /* Actions row */
@@ -98,7 +83,6 @@
       flex-wrap:wrap;
     }
 
-    .nowrap{ white-space:nowrap; }
     .muted{ color:rgba(0,0,0,.55); }
 
     /* ===== Charts layout (stacked) ===== */
@@ -108,55 +92,36 @@
       gap:12px;
       margin-top:12px;
     }
-
-    .chart-box{
-      position:relative;
-      width:100%;
-    }
-
+    .chart-box{ position:relative; width:100%; }
     .chart-box--bar{ height:340px; }
     .chart-box--pie{ height:420px; }
-
     .chart-box canvas{
       width:100% !important;
       height:100% !important;
       display:block;
     }
 
-    /* ✅ Horizontal scroll for bar chart */
+    /* ✅ Bar chart horizontal scroll (optional, keep if you want) */
     .chart-scroll{
       overflow-x:auto;
       overflow-y:hidden;
       -webkit-overflow-scrolling:touch;
     }
-    .chart-scroll-inner{
-      height:100%;
-      min-width:100%;
-    }
-    .chart-scroll canvas{
-      height:100% !important;
-      display:block;
-    }
+    .chart-scroll-inner{ height:100%; min-width:100%; }
+    .chart-scroll canvas{ height:100% !important; display:block; }
 
-    /* ===== Tables ===== */
+    /* ===== Table base ===== */
     .fixed-table{
       width:100%;
-      table-layout:fixed;
+      table-layout:auto; /* IMPORTANT for scroll tables */
     }
-
-    .fixed-table td,
-    .fixed-table th{
+    .fixed-table th,
+    .fixed-table td{
       vertical-align:top;
-      /* default desktop behavior */
-      word-break:break-word;
-      overflow-wrap:anywhere;
+      white-space:nowrap; /* ✅ keep each cell 1 line, scroll to see more */
     }
 
-    .fixed-table th{ white-space:nowrap; }
-    .cell-nowrap{ white-space:nowrap; }
-    .cell-wrap{ white-space:normal; }
-
-    /* ✅ Always make table horizontally scrollable (so Remark never disappears) */
+    /* ✅ SCROLL WRAPPER for the late list tables */
     .table-scroll{
       width:100%;
       overflow-x:auto;
@@ -164,8 +129,13 @@
       -webkit-overflow-scrolling:touch;
     }
 
+    /* ✅ Force table to be wide enough so "Remark" exists and can be swiped to */
+    .table-scroll .fixed-table{
+      min-width:720px; /* adjust if you want more/less */
+    }
+
     /* ===== Mobile improvements ===== */
-    @media (max-width: 520px){
+    @media (max-width:520px){
       .filter-toggle{ align-items:flex-start; }
 
       .pill-grid{
@@ -175,46 +145,17 @@
       }
       .pill{ width:100%; }
 
-      .filter-actions{
-        flex-direction:column;
-      }
+      .filter-actions{ flex-direction:column; }
       .filter-actions button{ width:100%; }
 
       .chart-box--bar{ height:280px; }
       .chart-box--pie{ height:320px; }
 
-      /* ✅ Fix remark issue properly on mobile:
-         - stop per-letter break
-         - keep Remark in 1 line
-         - ensure table has enough width so column 4 exists (scrollable) */
-      .fixed-table td,
-      .fixed-table th{
-        word-break:normal !important;
-        overflow-wrap:normal !important;
-      }
-
-      /* ensure the table is wide enough for 4 columns (swipe to see Remark) */
-      .table-scroll .fixed-table{
-        min-width:640px; /* adjust 600-760 depending on your preference */
-      }
-
-      /* Class stays one line */
-      .fixed-table th:nth-child(3),
-      .fixed-table td:nth-child(3){
-        white-space:nowrap !important;
-      }
-
-      /* ✅ Remark = column 4, force ONE line */
-      .fixed-table th:nth-child(4),
-      .fixed-table td:nth-child(4){
-        white-space:nowrap !important;
-        overflow:hidden;
-        text-overflow:ellipsis;
-        max-width:220px;
-      }
+      /* Tiny hint styling */
+      .swipe-hint{ margin:6px 0 0; }
     }
 
-    @media (max-width: 360px){
+    @media (max-width:360px){
       .pill-grid{ grid-template-columns:1fr; }
     }
   </style>
@@ -329,6 +270,10 @@
     <!-- Existing list -->
     <div class="card" style="margin-top:12px;">
       <h2 id="lateListTitle" data-i18n="teacher.lateListTitle" style="margin:0 0 10px;">Late Students List (Grouped by Level)</h2>
+
+      <!-- Optional hint so users know they can swipe -->
+      <div class="small muted swipe-hint">Swipe ← → to see Remark</div>
+
       <div id="lists"></div>
     </div>
   </div>
