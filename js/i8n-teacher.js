@@ -37,23 +37,29 @@ const DICT = {
     "teacher.moreFiltersHint": "Tick level/class to narrow the result.",
     "teacher.btn.filters": "Filters",
 
-    // (use Level wording - you said you use level, not standard)
     "teacher.levels": "Levels",
     "teacher.classes": "Classes",
     "teacher.btn.apply": "Apply Filters",
     "teacher.btn.reset": "Reset",
 
-    // optional (only if you later use these keys in JS)
+    // pills
     "teacher.pill.allLevels": "All Levels",
     "teacher.pill.allClasses": "All Classes",
     "teacher.pill.levelPrefix": "Level",
 
-    // optional: summary labels if you later use them
-    "teacher.summary": "Total Late",
+    // summary
+    "teacher.summaryTitle": "Summary",
+    "teacher.summaryTotal": "Total Late",
 
-    // charts (only if you later use these keys)
-    "teacher.chart.barTitle": "Late Count by Class",
-    "teacher.chart.barTitle": "Late % by Student (Selected Classes)",
+    // range labels (for summary line)
+    "teacher.rangeLabel.today": "Today",
+    "teacher.rangeLabel.last7": "Last 7 days",
+    "teacher.rangeLabel.thisMonth": "This month",
+    "teacher.rangeLabel.date": "Date",
+
+    // charts
+    "teacher.chart.barTitle.classCount": "Late Count by Class",
+    "teacher.chart.barTitle.studentPct": "Late % by Student (Selected Classes)",
     "teacher.chart.doughnutTitle": "Late % by Level",
 
     // frequency
@@ -65,7 +71,7 @@ const DICT = {
     // list section
     "teacher.lateListTitle": "Late Students List (Grouped by Level)",
 
-    // table headers (if you ever switch to i18n headers)
+    // table headers
     "teacher.th.dateTime": "Date/Time",
     "teacher.th.name": "Name",
     "teacher.th.class": "Class",
@@ -75,7 +81,10 @@ const DICT = {
 
     // empty states
     "teacher.empty.noRecords": "No records for this filter.",
-    "teacher.empty.noNames": "No student names found in this range."
+    "teacher.empty.noNames": "No student names found in this range.",
+
+    // errors
+    "teacher.error.load": "Error loading records. Check Console (F12)."
   },
 
   ms: {
@@ -121,10 +130,16 @@ const DICT = {
     "teacher.pill.allClasses": "Semua Kelas",
     "teacher.pill.levelPrefix": "Tahap",
 
-    "teacher.summary": "Jumlah Lewat",
+    "teacher.summaryTitle": "Ringkasan",
+    "teacher.summaryTotal": "Jumlah Lewat",
 
-    "teacher.chart.barTitle": "Jumlah Lewat Mengikut Kelas",
-    "teacher.chart.barTitle": "% Lewat Mengikut Murid (Kelas Dipilih)",
+    "teacher.rangeLabel.today": "Hari ini",
+    "teacher.rangeLabel.last7": "7 hari lepas",
+    "teacher.rangeLabel.thisMonth": "Bulan ini",
+    "teacher.rangeLabel.date": "Tarikh",
+
+    "teacher.chart.barTitle.classCount": "Jumlah Lewat Mengikut Kelas",
+    "teacher.chart.barTitle.studentPct": "% Lewat Mengikut Murid (Kelas Dipilih)",
     "teacher.chart.doughnutTitle": "% Lewat Mengikut Tahap",
 
     "teacher.freqTitle": "Kekerapan Lewat Murid (Mengikut Kelas)",
@@ -142,7 +157,9 @@ const DICT = {
     "teacher.th.pct": "%",
 
     "teacher.empty.noRecords": "Tiada rekod untuk penapis ini.",
-    "teacher.empty.noNames": "Tiada nama murid dijumpai dalam tempoh ini."
+    "teacher.empty.noNames": "Tiada nama murid dijumpai dalam tempoh ini.",
+
+    "teacher.error.load": "Ralat semasa memuatkan rekod. Sila semak Console (F12)."
   }
 };
 
@@ -153,16 +170,15 @@ export function getLang() {
 
 export function setLang(lang) {
   localStorage.setItem(STORAGE_KEY, lang);
-  // no dropdown: just re-apply current page text
-  applyI8n(document);
 }
 
+// translate
 export function t(key) {
   const lang = getLang();
   return DICT[lang]?.[key] ?? DICT.en?.[key] ?? key;
 }
 
-// ===== Apply i8n to DOM =====
+// ===== Apply i18n to DOM =====
 export function applyI8n(root = document) {
   const lang = getLang();
 
@@ -173,23 +189,14 @@ export function applyI8n(root = document) {
     if (text) el.textContent = text;
   });
 
-  // placeholders (if you use them later)
+  // placeholders
   root.querySelectorAll("[data-i18n-ph]").forEach(el => {
     const key = el.getAttribute("data-i18n-ph");
     const text = DICT[lang]?.[key] ?? DICT.en?.[key] ?? key;
     el.setAttribute("placeholder", text);
   });
 
-  // select options if you decide to use data-i18n-opt (optional)
-  root.querySelectorAll("option[data-i18n-opt]").forEach(opt => {
-    const key = opt.getAttribute("data-i18n-opt");
-    const text = DICT[lang]?.[key] ?? DICT.en?.[key] ?? key;
-    opt.textContent = text;
-  });
-
-  // If there is a dropdown someday, sync it
+  // sync dropdown
   const sel = root.getElementById?.("langSelect") || document.getElementById("langSelect");
   if (sel) sel.value = lang;
 }
-
-
