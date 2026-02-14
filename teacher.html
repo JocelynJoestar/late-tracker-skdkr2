@@ -101,7 +101,7 @@
       display:block;
     }
 
-    /* ✅ Bar chart horizontal scroll (optional, keep if you want) */
+    /* ✅ Bar chart horizontal scroll */
     .chart-scroll{
       overflow-x:auto;
       overflow-y:hidden;
@@ -113,25 +113,22 @@
     /* ===== Table base ===== */
     .fixed-table{
       width:100%;
-      table-layout:auto; /* IMPORTANT for scroll tables */
+      table-layout:auto;
     }
     .fixed-table th,
     .fixed-table td{
       vertical-align:top;
-      white-space:nowrap; /* ✅ keep each cell 1 line, scroll to see more */
+      white-space:nowrap;
     }
 
-    /* ✅ SCROLL WRAPPER for the late list tables */
     .table-scroll{
       width:100%;
       overflow-x:auto;
       overflow-y:hidden;
       -webkit-overflow-scrolling:touch;
     }
-
-    /* ✅ Force table to be wide enough so "Remark" exists and can be swiped to */
     .table-scroll .fixed-table{
-      min-width:720px; /* adjust if you want more/less */
+      min-width:720px;
     }
 
     /* ===== Mobile improvements ===== */
@@ -151,7 +148,6 @@
       .chart-box--bar{ height:280px; }
       .chart-box--pie{ height:320px; }
 
-      /* Tiny hint styling */
       .swipe-hint{ margin:6px 0 0; }
     }
 
@@ -170,6 +166,12 @@
       </div>
 
       <div style="display:flex; gap:10px; align-items:center;">
+        <!-- ✅ Language dropdown -->
+        <select id="langSelect" class="btn-ghost" style="padding:8px 10px;">
+          <option value="en">English</option>
+          <option value="ms">Bahasa Melayu</option>
+        </select>
+
         <button class="btn-ghost" id="logoutBtn" data-i18n="teacher.btn.logout">Logout</button>
       </div>
     </div>
@@ -234,14 +236,14 @@
 
     <!-- Summary -->
     <div class="card">
-      <h2 id="summaryTitle" data-i18n="teacher.summary" style="margin:0 0 10px;">Summary</h2>
+      <h2 id="summaryTitle" data-i18n="teacher.summaryTitle" style="margin:0 0 10px;">Summary</h2>
       <div id="summary" class="small muted">Loading…</div>
     </div>
 
     <!-- Charts -->
     <div class="charts-stack">
       <div class="card">
-        <h2 id="barTitle" data-i18n="teacher.chart.barTitle" style="margin:0 0 10px;">Late Count by Class</h2>
+        <h2 id="barTitle" data-i18n="teacher.chart.barTitle.classCount" style="margin:0 0 10px;">Late Count by Class</h2>
         <div class="chart-box chart-box--bar chart-scroll">
           <div class="chart-scroll-inner">
             <canvas id="classBar"></canvas>
@@ -270,8 +272,6 @@
     <!-- Existing list -->
     <div class="card" style="margin-top:12px;">
       <h2 id="lateListTitle" data-i18n="teacher.lateListTitle" style="margin:0 0 10px;">Late Students List (Grouped by Level)</h2>
-
-
       <div id="lists"></div>
     </div>
   </div>
@@ -280,4 +280,3 @@
   <script type="module" src="./js/teacher.js"></script>
 </body>
 </html>
-
