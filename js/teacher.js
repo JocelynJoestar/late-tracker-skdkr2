@@ -50,9 +50,9 @@ const applyFiltersBtn = document.getElementById("applyFiltersBtn");
 const resetFiltersBtn = document.getElementById("resetFiltersBtn");
 
 const studentStatsEl = document.getElementById("studentStats");
-
-// IMPORTANT: add id="levelDoughnutCard" to the doughnut card in HTML
 const levelDoughnutCard = document.getElementById("levelDoughnutCard");
+
+const langSelect = document.getElementById("langSelect");
 
 let classBarChart = null;
 let levelDoughnutChart = null;
@@ -104,21 +104,21 @@ function getRangeFromDropdown(type) {
   if (type === "daily") {
     const start = startOfDay(now);
     const end = addDays(start, 1);
-    return { start, end, label: "Today" };
+    return { start, end, label: t("teacher.rangeLabel.today") };
   }
   if (type === "weekly") {
     const end = now;
     const start = addDays(now, -7);
-    return { start, end, label: "Last 7 days" };
+    return { start, end, label: t("teacher.rangeLabel.last7") };
   }
-  return { start: startOfMonth(), end: now, label: "This month" };
+  return { start: startOfMonth(), end: now, label: t("teacher.rangeLabel.thisMonth") };
 }
 
 function getRangeFromPickedDate(dateStr) {
   const [y, m, d] = dateStr.split("-").map(Number);
   const start = new Date(y, m - 1, d, 0, 0, 0, 0);
   const end = addDays(start, 1);
-  return { start, end, label: `Date: ${dateStr}` };
+  return { start, end, label: `${t("teacher.rangeLabel.date")}: ${dateStr}` };
 }
 
 function groupBy(arr, keyFn) {
@@ -133,7 +133,6 @@ function groupBy(arr, keyFn) {
 
 // ===== Filters =====
 function getAllLevels() {
-  // fixed: never show undefined; only 1..6
   return Array.from(
     new Set(
       CLASSES
@@ -152,13 +151,17 @@ function renderFilterCheckboxes() {
   const classes = getAllClassNames();
 
   levelFiltersEl.innerHTML = [
-    `<label class="pill"><input type="checkbox" data-type="level" value="__ALL__" checked /><span class="all">All Levels</span></label>`,
-    ...levels.map(l => `<label class="pill"><input type="checkbox" data-type="level" value="${l}" /><span>Level ${l}</span></label>`)
+    `<label class="pill"><input type="checkbox" data-type="level" value="__ALL__" checked />
+      <span class="all">${escapeHtml(t("teacher.pill.allLevels"))}</span></label>`,
+    ...levels.map(l => `<label class="pill"><input type="checkbox" data-type="level" value="${l}" />
+      <span>${escapeHtml(t("teacher.pill.levelPrefix"))} ${l}</span></label>`)
   ].join("");
 
   classFiltersEl.innerHTML = [
-    `<label class="pill"><input type="checkbox" data-type="class" value="__ALL__" checked /><span class="all">All Classes</span></label>`,
-    ...classes.map(cn => `<label class="pill"><input type="checkbox" data-type="class" value="${escapeHtml(cn)}" /><span>${escapeHtml(cn)}</span></label>`)
+    `<label class="pill"><input type="checkbox" data-type="class" value="__ALL__" checked />
+      <span class="all">${escapeHtml(t("teacher.pill.allClasses"))}</span></label>`,
+    ...classes.map(cn => `<label class="pill"><input type="checkbox" data-type="class" value="${escapeHtml(cn)}" />
+      <span>${escapeHtml(cn)}</span></label>`)
   ].join("");
 
   // "All" exclusive
@@ -256,23 +259,22 @@ function buildStats(records, selected) {
   }
 
   const levelNums = Array.from(levelCounts.keys()).sort((a, b) => Number(a) - Number(b));
-  const levelLabels = levelNums.map(l => `Level ${l}`);
+  const levelLabels = levelNums.map(l => `${t("teacher.pill.levelPrefix")} ${l}`);
   const levelValues = levelNums.map(l => levelCounts.get(l));
 
   const classAll = !!selected.classAll;
   const chosenClasses = selected.classes || [];
   const exactlyOneClass = !classAll && chosenClasses.length === 1;
-
   const hideDoughnut = exactlyOneClass;
 
   let barMode = "classCount";
-  let barTitle = "Late Count by Class";
+  let barTitle = t("teacher.chart.barTitle.classCount");
   let barLabels = [];
   let barDatasets = [];
 
   if (!classAll && chosenClasses.length >= 1) {
     barMode = "studentPctMulti";
-    barTitle = "Late % by Student (Selected Classes)";
+    barTitle = t("teacher.chart.barTitle.studentPct");
 
     const nameSet = new Set();
     const perClass = [];
@@ -324,40 +326,30 @@ function setupScrollableBarCanvas(labels) {
   const canvas = document.getElementById("classBar");
   if (!canvas) return;
 
-  // Your HTML will wrap the canvas in .chart-scroll / .chart-scroll-inner
   const inner = canvas.closest(".chart-scroll-inner");
 
-  // Reset to default first (so switching filters doesn't keep old width)
   canvas.style.width = "100%";
   canvas.removeAttribute("width");
   if (inner) inner.style.minWidth = "100%";
 
   const count = Array.isArray(labels) ? labels.length : 0;
-
-  // Only widen/scroll when there are many bars
-  // (You can change 6 -> 8 if you want later)
   if (count <= 6) return;
 
-  // Bar spacing (feel free to tweak)
-  const pxPerBar = 80;   // bigger = more spacing per class
-  const minWidth = 520;  // minimum for nice look
-
+  const pxPerBar = 80;
+  const minWidth = 520;
   const desiredWidth = Math.max(minWidth, count * pxPerBar);
 
-  // This makes the canvas physically wider so user can swipe horizontally
   canvas.style.width = desiredWidth + "px";
-  canvas.width = desiredWidth; // important: sharp rendering
+  canvas.width = desiredWidth;
 
   if (inner) inner.style.minWidth = desiredWidth + "px";
 }
-
 
 // ===== Render charts =====
 function renderCharts(stats) {
   const ctxBar = document.getElementById("classBar");
   const ctxD = document.getElementById("levelDoughnut");
 
-  // Update bar chart title dynamically
   const barTitleEl = document.getElementById("barTitle");
   if (barTitleEl) barTitleEl.textContent = stats.barTitle;
 
@@ -366,8 +358,6 @@ function renderCharts(stats) {
 
   const isPct = stats.barMode === "studentPctMulti";
 
-  // ✅ Make bar chart scrollable on mobile when many labels
-  // Works for ALL devices because it's just CSS overflow + a wider canvas
   setupScrollableBarCanvas(stats.barLabels);
 
   classBarChart = new Chart(ctxBar, {
@@ -389,7 +379,7 @@ function renderCharts(stats) {
       scales: {
         x: {
           ticks: {
-            autoSkip: false, // ✅ show ALL labels (no skipping)
+            autoSkip: false,
             maxRotation: 0,
             minRotation: 0,
             callback: function(value) {
@@ -430,7 +420,7 @@ function renderLists(records) {
   const levels = Array.from(byLevel.keys()).sort((a, b) => a - b);
 
   if (records.length === 0) {
-    listsEl.innerHTML = `<p class="small">No records for this filter.</p>`;
+    listsEl.innerHTML = `<p class="small">${escapeHtml(t("teacher.empty.noRecords"))}</p>`;
     return;
   }
 
@@ -447,8 +437,8 @@ function renderLists(records) {
 
     return `
       <div class="card" style="margin-top:12px;">
-        <h3 style="margin:0 0 10px; font-size:14px;">Level ${escapeHtml(level)}</h3>
-        <div style="overflow:auto;">
+        <h3 style="margin:0 0 10px; font-size:14px;">${escapeHtml(t("teacher.pill.levelPrefix"))} ${escapeHtml(level)}</h3>
+        <div class="table-scroll">
           <table class="fixed-table">
             <colgroup>
               <col style="width:170px;">
@@ -458,10 +448,10 @@ function renderLists(records) {
             </colgroup>
             <thead>
               <tr>
-                <th>Date/Time</th>
-                <th>Name</th>
-                <th>Class</th>
-                <th>Remark</th>
+                <th>${escapeHtml(t("teacher.th.dateTime"))}</th>
+                <th>${escapeHtml(t("teacher.th.name"))}</th>
+                <th>${escapeHtml(t("teacher.th.class"))}</th>
+                <th>${escapeHtml(t("teacher.th.remark"))}</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
@@ -504,14 +494,14 @@ function renderStudentFrequency(records) {
   if (!studentStatsEl) return;
 
   if (records.length === 0) {
-    studentStatsEl.innerHTML = `<p class="small">No records for this filter.</p>`;
+    studentStatsEl.innerHTML = `<p class="small">${escapeHtml(t("teacher.empty.noRecords"))}</p>`;
     return;
   }
 
   const data = buildStudentFrequency(records);
 
   if (data.length === 0) {
-    studentStatsEl.innerHTML = `<p class="small">No student names found in this range.</p>`;
+    studentStatsEl.innerHTML = `<p class="small">${escapeHtml(t("teacher.empty.noNames"))}</p>`;
     return;
   }
 
@@ -531,7 +521,7 @@ function renderStudentFrequency(records) {
     return `
       <div class="card" style="margin-top:12px;">
         <h3 style="margin:0 0 8px; font-size:14px;">
-          ${escapeHtml(cls)} <span class="muted small">• total ${total}</span>
+          ${escapeHtml(cls)} <span class="muted small">• ${escapeHtml(t("teacher.total"))} ${total}</span>
         </h3>
 
         <div style="overflow:auto;">
@@ -543,9 +533,9 @@ function renderStudentFrequency(records) {
             </colgroup>
             <thead>
               <tr>
-                <th>Name</th>
-                <th class="right">Late</th>
-                <th class="right">%</th>
+                <th>${escapeHtml(t("teacher.th.name"))}</th>
+                <th class="right">${escapeHtml(t("teacher.th.late"))}</th>
+                <th class="right">${escapeHtml(t("teacher.th.pct"))}</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
@@ -580,7 +570,7 @@ async function loadRangeAndRender() {
     snap = await getDocs(q);
   } catch (err) {
     console.error(err);
-    summaryEl.textContent = "Error loading records. Check Console (F12).";
+    summaryEl.textContent = t("teacher.error.load");
     listsEl.innerHTML = "";
     if (studentStatsEl) studentStatsEl.innerHTML = "";
     return;
@@ -592,23 +582,37 @@ async function loadRangeAndRender() {
   const filtered = applyRecordFilters(all, selected);
 
   const stats = buildStats(filtered, selected);
-  summaryEl.textContent = `${range.label} • Total Late: ${stats.total}`;
+
+  summaryEl.textContent = `${range.label} • ${t("teacher.summaryTotal")}: ${stats.total}`;
 
   renderCharts(stats);
   renderStudentFrequency(filtered);
   renderLists(filtered);
 
-  // ✅ update any data-i18n labels in HTML
+  // apply i18n for any data-i18n elements
   try { applyI8n?.(document); } catch {}
 }
 
 // ===== Init =====
 (async () => {
   try {
-    // ✅ i8n init (no dropdown)
-    const saved = getLang?.();
-    if (!saved) setLang?.("en"); // change to "ms" if you want default Malay
+    // ✅ i18n init (with dropdown)
+    const saved = getLang?.() || "en";
+    setLang?.(saved);
     applyI8n?.(document);
+
+    if (langSelect) {
+      langSelect.value = saved;
+      langSelect.addEventListener("change", async (e) => {
+        setLang?.(e.target.value);
+        applyI8n?.(document);
+
+        // rebuild pills because those are generated by JS
+        renderFilterCheckboxes();
+
+        await loadRangeAndRender();
+      });
+    }
 
     const { user, profile } = await requireRole(["teacher"]);
     document.getElementById("whoami").textContent =
@@ -660,4 +664,3 @@ async function loadRangeAndRender() {
     if (summaryEl) summaryEl.textContent = `Error: ${msg}`;
   }
 })();
-
